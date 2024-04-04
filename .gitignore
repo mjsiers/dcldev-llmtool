@@ -1,0 +1,22 @@
+# ensure environment variables files are ignored
+.env
+
+# exclude venv/mypy/pytest/ruff cache files
+.venv
+.mypy_cache
+.pytest_cache
+.ruff_cache
+
+# byte-compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# exclude mkdocs generated files
+site
+
+# exclude test assessment files
+data/assessments/clients
+
+# exclude local vector store files
+data/vectors

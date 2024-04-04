@@ -1,0 +1,149 @@
+[
+  {
+    "title": "key-reasons",
+    "text": "Key Reason for Assessment",
+    "skip": false,
+    "max_length": -1,
+    "text_range": "0:-1"
+  },
+  {
+    "title": "summary-impact",
+    "text": "Summary and Impact of Challenges",
+    "skip": true,
+    "max_length": -1,
+    "text_range": null
+  },
+  {
+    "title": "neuro-developmental",
+    "text": "Neurodevelopmental",
+    "skip": false,
+    "max_length": -1,
+    "text_range": "11:"
+  },
+  {
+    "title": "cognitive-processing",
+    "text": "Cognitive Processing",
+    "skip": false,
+    "max_length": -1,
+    "text_range": "12:-1"
+  },
+  {
+    "title": "auditory-processing",
+    "text": "Auditory Processing",
+    "skip": false,
+    "max_length": -1,
+    "text_range": "13:-1"
+  },
+  {
+    "title": "visual-processing",
+    "text": "Visual Processing",
+    "skip": false,
+    "max_length": -1,
+    "text_range": "1:-1"
+  },
+  {
+    "title": "attention-focus",
+    "text": "Attention Focus",
+    "skip": false,
+    "max_length": -1,
+    "text_range": "1:-1"
+  },
+  {
+    "title": "executive-function",
+    "text": "Executive Function",
+    "skip": false,
+    "max_length": -1,
+    "text_range": "8:-1"
+  },
+  {
+    "title": "phonological-awareness",
+    "text": "Phonological Awareness",
+    "skip": false,
+    "max_length": -1,
+    "text_range": "1:-1"
+  },
+  {
+    "title": "dyslexia",
+    "text": "Dyslexia. Reading, and Spelling Skills",
+    "skip": false,
+    "max_length": -1,
+    "text_range": "1:-1"
+  },
+  {
+    "title": "dysgraphia",
+    "text": "Dysgraphia",
+    "skip": false,
+    "max_length": -1,
+    "text_range": "1:"
+  },
+  {
+    "title": "dysgraphia",
+    "text": "Writing",
+    "skip": false,
+    "max_length": -1,
+    "text_range": "1:"
+  },
+  {
+    "title": "graphomotor",
+    "text": "Graphomotor",
+    "skip": false,
+    "max_length": -1,
+    "text_range": "1:"
+  },
+  {
+    "title": "disorientation-neurotiming",
+    "text": "Disorientation and Neuro-timing",
+    "skip": false,
+    "max_length": -1,
+    "text_range": null
+  },
+  {
+    "title": "comprehension",
+    "text": "Comprehension",
+    "skip": false,
+    "max_length": -1,
+    "text_range": "7:"
+  },
+  {
+    "title": "expressive-language",
+    "text": "Expressive Language Skills",
+    "skip": false,
+    "max_length": -1,
+    "text_range": "1:"
+  },
+  {
+    "title": "math-concepts",
+    "text": "Math Concepts and Skills",
+    "skip": false,
+    "max_length": -1,
+    "text_range": "1:"
+  },
+  {
+    "title": "what-canbe-done",
+    "text": "What Can Be Done?",
+    "skip": true,
+    "max_length": -1,
+    "text_range": null
+  },
+  {
+    "title": "recommendations",
+    "text": "Programming /Recommendations",
+    "skip": false,
+    "max_length": 90,
+    "text_range": null
+  },
+  {
+    "title": "commitment",
+    "text": "Commitment",
+    "skip": false,
+    "max_length": -1,
+    "text_range": null
+  },
+  {
+    "title": "testing-scores",
+    "text": "Testing and Scores",
+    "skip": true,
+    "max_length": -1,
+    "text_range": null
+  }
+]
