@@ -1,14 +1,14 @@
 .PHONY: style
 style: ## Patch code quality style issues.
 	@poetry run isort .
-	@poetry run black ./source/ffrembot ./tests
+	@poetry run black ./source/llmtool ./tests
 
 .PHONY: check-style
 check-style: ## Run code quality style tools.
 	@echo "🚀 Code style checks: Running isort"
 	@poetry run isort . --check-only
 	@echo "🚀 Code style checks: Running black"
-	@poetry run black --check ./source/ffrembot ./tests
+	@poetry run black --check ./source/llmtool ./tests
 
 .PHONY: check-types
 check-types: ## Run code quality types tools.

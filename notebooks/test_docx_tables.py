@@ -1,8 +1,7 @@
 #%%
 import json
+
 from docx import Document
-
-
 
 #%%
 client_filename = "../data/assessments/clients/2021-richner-will.docx"

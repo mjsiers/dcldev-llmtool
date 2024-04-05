@@ -1,7 +1,7 @@
 #%%
 import json
-from docx import Document
 
+from docx import Document
 
 #%%
 table_defn = [
