@@ -3,7 +3,7 @@ import logging
 import click
 
 from ..settings import load_config
-from .tools_load import load_template_file
+from .tools_load import load_assessment_files, load_template_file
 
 # configure logging
 logger = logging.getLogger(__name__)
@@ -20,7 +20,7 @@ def tools(ctx):
 @click.option(
     "--datapath",
     type=str,
-    default="../data/assessments/clients",
+    default="./data/assessments/clients",
     help="Folder with assessment files.",
 )
 @click.option(
@@ -50,6 +50,9 @@ def load(ctx, datapath: str, filepath: str, sections: str, tables: str):
 
     logger.info("load: SECTIONS[%s]", len(sections_data))
     logger.info("load: TABLES[%s]", len(tables_data))
+
+    # load the assessment files found in the specified location
+    load_assessment_files(datapath, sections_data, tables_data)
 
 
 @tools.command("search", context_settings={"show_default": True})
