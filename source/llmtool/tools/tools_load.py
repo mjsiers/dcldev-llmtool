@@ -1,6 +1,7 @@
+import json
 import logging
 import os
-from typing import Dict, List, Optional
+from typing import Dict, Optional
 
 import fsspec
 
@@ -54,4 +55,6 @@ def load_template_file(filepath: str, filename: str) -> Optional[Dict]:
     if json_data is None:
         return None
 
-    return json_data
+    # load python dictionary from string
+    json_dict = json.loads(json_data)
+    return json_dict

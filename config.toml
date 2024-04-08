@@ -1,0 +1,8 @@
+[models]
+embedding = "nomic-embed-text"
+chat = "mistral:7b"
+
+[lancedb]
+database_name = "dcl-llmtool"
+assessment_table = "dcl-assessment"
+section_table = "dcl-assessment-section"

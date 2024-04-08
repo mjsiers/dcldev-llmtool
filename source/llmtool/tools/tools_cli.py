@@ -2,6 +2,7 @@ import logging
 
 import click
 
+from ..settings import load_config
 from .tools_load import load_template_file
 
 # configure logging
@@ -36,6 +37,9 @@ def load(ctx, datapath: str, filepath: str, sections: str, tables: str):
     logger.info("load: FILEPATH[%s]", filepath)
     logger.info("load: SECTIONS[%s]", sections)
     logger.info("load: TABLES[%s]", tables)
+
+    # load the global settings configuration file
+    load_config()
 
     # load the template sections definitions
     sections_data = load_template_file(filepath, sections)

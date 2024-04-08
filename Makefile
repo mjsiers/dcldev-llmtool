@@ -10,6 +10,11 @@ check-style: ## Run code quality style tools.
 	@echo "🚀 Code style checks: Running black"
 	@poetry run black --check ./source/llmtool ./tests
 
+.PHONY: check-lint
+check-lint: ## Run code linting tools.
+	@echo "🚀 Static code linting : Running ruff"
+	@poetry run ruff check ./source
+
 .PHONY: check-types
 check-types: ## Run code quality types tools.
 	@echo "🚀 Static type checking: Running mypy"
