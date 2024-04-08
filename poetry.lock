@@ -565,24 +565,6 @@ files = [
 packaging = "*"
 
 [[package]]
-name = "docx2python"
-version = "2.8.0"
-description = "Extract content from docx files"
-optional = false
-python-versions = ">=3.8.0"
-files = [
-    {file = "docx2python-2.8.0-py3-none-any.whl", hash = "sha256:0ebb3702902c21449ac8374e9d5d55d1b83d31a1504f20b8a8ad0026f5fc941e"},
-    {file = "docx2python-2.8.0.tar.gz", hash = "sha256:b780a1775fd6ac7eebda482be3cd2e8e49f26a88476df09205862fb74376a581"},
-]
-
-[package.dependencies]
-lxml = "*"
-typing-extensions = "*"
-
-[package.extras]
-dev = ["commitizen", "pre-commit", "pytest", "types-lxml"]
-
-[[package]]
 name = "duckdb"
 version = "0.10.1"
 description = "DuckDB in-process database"
@@ -2032,17 +2014,17 @@ testing = ["pytest", "pytest-benchmark"]
 
 [[package]]
 name = "polars"
-version = "0.20.18"
+version = "0.20.19"
 description = "Blazingly fast DataFrame library"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "polars-0.20.18-cp38-abi3-macosx_10_12_x86_64.whl", hash = "sha256:e305f5e6c0b8dc37fe0ff3bb1143a8bf0341134e0b23dec7c50a148f426acceb"},
-    {file = "polars-0.20.18-cp38-abi3-macosx_11_0_arm64.whl", hash = "sha256:26716f074301f583da9af93108d57da631622d6496cbcbb8c08476180953f408"},
-    {file = "polars-0.20.18-cp38-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:5b3843f69228df68cb82e39647c212fde58671c064c25a0c4d544f9446160a7e"},
-    {file = "polars-0.20.18-cp38-abi3-manylinux_2_24_aarch64.whl", hash = "sha256:4b775e9677d0050775243400def1f5de4dd02b5ee220873406abc4028228525e"},
-    {file = "polars-0.20.18-cp38-abi3-win_amd64.whl", hash = "sha256:73b81b9582c48f0ca4ae08c0adc56917b0c55682044bedf0eccd3f94e4e39169"},
-    {file = "polars-0.20.18.tar.gz", hash = "sha256:8a321cbdbb459e3c0cc1af2ce6ac930d0d3b5ccbeb2dd3e4237ad07d487fd290"},
+    {file = "polars-0.20.19-cp38-abi3-macosx_10_12_x86_64.whl", hash = "sha256:1d5a63001c8e47376f35b6e389e7f88e6984c721bd9468b01998807bad3c0f2f"},
+    {file = "polars-0.20.19-cp38-abi3-macosx_11_0_arm64.whl", hash = "sha256:6790e9e8ce0bb8dcefa4e494b5e4ee5eca01df0c7d7151dcc45a7b24aa58939b"},
+    {file = "polars-0.20.19-cp38-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:b9243752dd2f0c9077b2caa285e4b05d3f80558ad4b8ae448dc41a0b9d5f10a5"},
+    {file = "polars-0.20.19-cp38-abi3-manylinux_2_24_aarch64.whl", hash = "sha256:a0d57955cdc3610ec644ffd249c94c3102ce32df31661b759ab33a6bb4fae65c"},
+    {file = "polars-0.20.19-cp38-abi3-win_amd64.whl", hash = "sha256:20ff4990cbdc05fc5a526902561a16c66ead4d740ff8e7b3bf52d4f3f7def60a"},
+    {file = "polars-0.20.19.tar.gz", hash = "sha256:58f9c3766c6fa3d7193364cfcf93c6c640e6c8e6a49ad8c6fd48b326ad8060f2"},
 ]
 
 [package.extras]
@@ -2423,6 +2405,21 @@ files = [
 
 [package.dependencies]
 six = ">=1.5"
+
+[[package]]
+name = "python-docx"
+version = "1.1.0"
+description = "Create, read, and update Microsoft Word .docx files."
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "python-docx-1.1.0.tar.gz", hash = "sha256:5829b722141cf1ab79aedf0c34d9fe9924b29764584c0f2164eb2b02dcdf17c9"},
+    {file = "python_docx-1.1.0-py3-none-any.whl", hash = "sha256:bac9773278098a1ddc43a52d84e22f5909c4a3080a624530b3ecb3771b07c6cd"},
+]
+
+[package.dependencies]
+lxml = ">=3.1.0"
+typing-extensions = "*"
 
 [[package]]
 name = "python-dotenv"
@@ -3407,4 +3404,4 @@ test = ["websockets"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.11"
-content-hash = "8bea0d9b7e6b6afee2e058c90f53ae0a18ab5ed9be31000db399dd3cd0219ac7"
+content-hash = "7b3924d15cc3bfe1b2ff6ec32a9e66e28f79b01df688797b26221a7287b321a1"
