@@ -65,7 +65,7 @@ def docx_parse_sections(file_name: str, sections_defn: Dict) -> Dict:
                         for item in section_data:
                             section_length += len(item)
                         doc_sections[section_info["title"]] = section_data
-                        #print(section_info["title"], len(section_data), section_length)
+                        # print(section_info["title"], len(section_data), section_length)
 
                 # initialize the new section data
                 section_index = new_index

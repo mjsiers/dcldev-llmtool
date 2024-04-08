@@ -15,9 +15,10 @@ ollama_model_embed = "nomic-embed-text"
 ollama_model_chat = "mistral:7b"
 
 # define and set the default database table names
+lancedb_database_path = "./data/vectors/lancedb"
 lancedb_database_name = "dcl-llmtool"
 lancedb_assessment_table = "dcl-assessment"
-lancedb_section_table = "dcl-assessment-section"
+lancedb_section_table = "dcl-section"
 
 
 def load_config() -> None:
@@ -54,14 +55,15 @@ def load_config() -> None:
 
     # load the lancedb vector database configuration values
     if "lancedb" in config:
+        if "database_path" in config["lancedb"]:
+            lancedb_database_path = config["lancedb"]["database_path"]
+            logger.info("load_config: %s: %s", "lancedb_database_path", lancedb_database_path)
         if "database_name" in config["lancedb"]:
             lancedb_database_name = config["lancedb"]["database_name"]
-            logger.debug("load_config: %s: %s", "lancedb_database_name", lancedb_database_name)
+            logger.info("load_config: %s: %s", "lancedb_database_name", lancedb_database_name)
         if "assessment_table" in config["lancedb"]:
             lancedb_assessment_table = config["lancedb"]["assessment_table"]
-            logger.debug(
-                "load_config: %s: %s", "lancedb_assessment_table", lancedb_assessment_table
-            )
+            logger.info("load_config: %s: %s", "lancedb_assessment_table", lancedb_assessment_table)
         if "section_table" in config["lancedb"]:
             lancedb_section_table = config["lancedb"]["section_table"]
-            logger.debug("load_config: %s: %s", "lancedb_section_table", lancedb_section_table)
+            logger.info("load_config: %s: %s", "lancedb_section_table", lancedb_section_table)
