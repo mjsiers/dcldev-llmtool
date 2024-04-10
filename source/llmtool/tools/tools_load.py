@@ -93,6 +93,8 @@ def load_assessment_files(filepath: str, sections_data: Dict, tables_data: Dict)
     db = database_connect()
     database_drop_tables(db)
     database_create_tables(db)
+    total_files = 0
+    valid_files = 0
 
     if file_folder:
         # get a list of all the docx files
@@ -102,6 +104,7 @@ def load_assessment_files(filepath: str, sections_data: Dict, tables_data: Dict)
             # get the document basename and load the document
             file_basename = os.path.basename(item)
             document = Document(item)
+            total_files += 1
 
             # try parsing out the client info
             doc_client = docx_parse_client(file_basename, document)
@@ -114,6 +117,7 @@ def load_assessment_files(filepath: str, sections_data: Dict, tables_data: Dict)
             if (doc_sections is not None) and (len(doc_sections) > 0):
                 # create all the required embeddings from this document
                 database_embed_sections(db, doc_client, doc_sections)
+                valid_files += 1
 
     elif file_iszip:
         # get a list of all the files in the zip archive
@@ -126,12 +130,14 @@ def load_assessment_files(filepath: str, sections_data: Dict, tables_data: Dict)
                         # get the document basename and load the document
                         file_basename = os.path.basename(f)
                         document = Document(fp)
+                        total_files += 1
 
                         # try parsing out the client info
                         doc_client = docx_parse_client(file_basename, document)
                         if doc_client is None:
                             logger.warning(
-                                "load_assessment_files: [%s] was unable to parse client info.", item
+                                "load_assessment_files: [%s] was unable to parse client info.",
+                                file_basename,
                             )
                             continue
 
@@ -140,3 +146,8 @@ def load_assessment_files(filepath: str, sections_data: Dict, tables_data: Dict)
                         if (doc_sections is not None) and (len(doc_sections) > 0):
                             # create all the required embeddings from this document
                             database_embed_sections(db, doc_client, doc_sections)
+                            valid_files += 1
+
+    logger.info(
+        "load_assessment_files: Loaded [%s / %s] assessment files.", valid_files, total_files
+    )

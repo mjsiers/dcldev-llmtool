@@ -57,7 +57,7 @@ def database_embed_sections(
     for k, v in doc_sections.items():
         # ensure we have at least one text string
         if len(v) == 0:
-            logger.warning(
+            logger.debug(
                 "database_embed_sections: [%s] section [%s] is empty.",
                 doc_data.assessment_file,
                 k,
@@ -94,7 +94,7 @@ def database_embed_sections(
     # add all the section data to the database
     tbl_section = db.open_table(lancedb_section_table)
     tbl_section.add(pa_table)
-    logger.info(
+    logger.debug(
         "database_embed_sections: [%s] has %s section embeddings.",
         doc_data.assessment_file,
         len(list_sections),

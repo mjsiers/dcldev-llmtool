@@ -19,17 +19,40 @@ def is_section_text(text: str, sections_text: List[str]) -> int:
     return -1
 
 
-def get_age(date: str, birth_date: str) -> float:
+def get_age(date: str, birth_date: str) -> Optional[float]:
+    # ensure the date and birth date are valid
+    if len(date) == 0 or len(birth_date) == 0:
+        return None
+
+    # parse the date values
     today = datetime.strptime(date, "%Y-%m-%d")
     dob = datetime.strptime(birth_date, "%Y-%m-%d")
+
+    # compute the age value
     delta_days = (today - dob).days
     age_value = delta_days / 365.25
     return age_value
 
 
-def get_grade(grade: str) -> int:
-    if not grade[-1].isdigit():
-        grade = grade[:-2]
+def get_grade(grade: str) -> Optional[int]:
+    # ensure the grade is not empty
+    grade = grade.strip()
+    if len(grade) == 0:
+        return None
+
+    # determine the number of numeric characters in the grade
+    num_length = 0
+    for c in grade:
+        if not c.isdigit():
+            break
+        num_length += 1
+
+    # ensure we have some numeric characters
+    if num_length == 0:
+        return None
+
+    # convert the grade to a numeric value
+    grade = grade[:num_length]
     return int(grade)
 
 
@@ -90,6 +113,16 @@ def docx_parse_client(file_name: str, document: Document) -> Optional[DocumentSc
 
         # update the output value based on the key value
         if item_key.startswith("Date"):
+            # ensure we have a valid date value
+            if len(item_value) == 0:
+                logger.warning(
+                    "docx_parse_client: [%s] Missing date value [%s][%s].",
+                    file_name,
+                    item_key,
+                    item_value,
+                )
+                continue
+
             # ensure date is in correct format
             delimiter = "-"
             if "/" in item_value:
@@ -98,15 +131,19 @@ def docx_parse_client(file_name: str, document: Document) -> Optional[DocumentSc
             # ensure date is in correct format
             date_info = item_value.split(delimiter)
             if len(date_info) == 3:
+                if len(date_info[2]) > 4:
+                    date_info[2] = date_info[2][:4]
                 date_year = int(date_info[2])
                 date_month = int(date_info[0])
                 date_day = int(date_info[1])
             elif len(date_info) == 2:
-                date_year = int(date_info[1])
+                if len(date_info[1]) > 4:
+                    date_info[2] = date_info[1][:4]
+                date_year = int(date_info[1][:4])
                 date_month = int(date_info[0])
                 date_day = 1
             else:
-                logger.error(
+                logger.warning(
                     "docx_parse_client: Unable to parse date value [%s][%s].", item_key, item_value
                 )
                 continue

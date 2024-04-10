@@ -17,12 +17,13 @@ def tools(ctx):
 
 # default_folder = "./data/assessments/clients"
 # default_zipfile = "./data/assessments/clients-20240410.zip"
+# default_zipfile = "./data/assessments/drive-download-20240409.zip"
 @tools.command("load", context_settings={"show_default": True})
 @click.pass_context
 @click.option(
     "--datapath",
     type=str,
-    default="./data/assessments/clients",
+    default="./data/assessments/drive-download-20240409.zip",
     help="Folder or zip file with assessment files.",
 )
 @click.option(
