@@ -1,7 +1,6 @@
 import logging
 import os
-import uuid
-from typing import Dict, List
+from typing import Any, Dict, List
 
 import lancedb
 import numpy as np
@@ -43,16 +42,14 @@ def database_create_tables(db: lancedb.DBConnection) -> None:
         db.create_table(lancedb_section_table, schema=SectionSchema)
 
 
-def database_embed_sections(db: lancedb.DBConnection, doc_name: str, doc_sections: Dict) -> None:
+def database_embed_sections(
+    db: lancedb.DBConnection, doc_data: DocumentSchema, doc_sections: Dict
+) -> None:
     # increase the log level for the httpx library to reduce output messages
     logging.getLogger("httpx").setLevel(logging.WARNING)
 
-    # generate a new unique identifier for this document
-    doc_uuid = str(uuid.uuid4())
-
     # create the document type
     tbl_assessment = db.open_table(lancedb_assessment_table)
-    doc_data = DocumentSchema(assessment_uuid=doc_uuid, assessment_file=doc_name)
     tbl_assessment.add([doc_data])
 
     # create the sections for this documment
@@ -62,7 +59,7 @@ def database_embed_sections(db: lancedb.DBConnection, doc_name: str, doc_section
         if len(v) == 0:
             logger.warning(
                 "database_embed_sections: [%s] section [%s] is empty.",
-                doc_name,
+                doc_data.assessment_file,
                 k,
             )
             continue
@@ -74,12 +71,15 @@ def database_embed_sections(db: lancedb.DBConnection, doc_name: str, doc_section
         # initialize the section data using the pydantic mode
         # save the model into the local list as a dictionary
         logger.debug(
-            "database_embed_sections: [%s] section [%s] has %s text strings.", doc_name, k, len(v)
+            "database_embed_sections: [%s] section [%s] has %s text strings.",
+            doc_data.assessment_file,
+            k,
+            len(v),
         )
         section_data = SectionSchema(
-            assessment_uuid=doc_uuid,
-            client_age=None,
-            client_grade=None,
+            assessment_uuid=doc_data.assessment_uuid,
+            client_age=doc_data.client_age,
+            client_grade=doc_data.client_grade,
             section=k,
             text=section_text,
             vector=result["embedding"],
@@ -95,5 +95,7 @@ def database_embed_sections(db: lancedb.DBConnection, doc_name: str, doc_section
     tbl_section = db.open_table(lancedb_section_table)
     tbl_section.add(pa_table)
     logger.info(
-        "database_embed_sections: [%s] has %s section embeddings.", doc_name, len(list_sections)
+        "database_embed_sections: [%s] has %s section embeddings.",
+        doc_data.assessment_file,
+        len(list_sections),
     )

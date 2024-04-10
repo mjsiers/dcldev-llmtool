@@ -34,6 +34,7 @@ def get_grade(grade: str) -> int:
 
 
 def docx_parse_client(file_name: str, document: Document) -> Optional[DocumentSchema]:
+    # ensure the document has at least one table
     if len(document.tables) == 0:
         logger.error("docx_parse_client: [%s] does not have any tables.", file_name)
         return None
@@ -42,7 +43,11 @@ def docx_parse_client(file_name: str, document: Document) -> Optional[DocumentSc
     table = document.tables[0]
     num_rows = len(table.rows)
     num_cols = len(table.columns)
-    logger.info("docx_parse_client: [%s] table size [%s][%s].", file_name, num_rows, num_cols)
+    if (num_rows != 4) and (num_cols != 2):
+        logger.error(
+            "docx_parse_client: [%s] invalid table size [%s][%s].", file_name, num_rows, num_cols
+        )
+        return None
 
     # initialize the document schema values
     doc_uuid = str(uuid.uuid4())
@@ -72,6 +77,12 @@ def docx_parse_client(file_name: str, document: Document) -> Optional[DocumentSc
 
     # loop through the list of strings
     for item in list_info:
+        # ensure the required delimiter is found
+        delimiter = ":"
+        if ":" not in item:
+            logger.warning("docx_parse_client: [%s] has invalid item [%s].", file_name, item)
+            continue
+
         # split the string on the colon and get the key and value
         item_split = item.split(":", 1)
         item_key = item_split[0].strip()
@@ -80,8 +91,32 @@ def docx_parse_client(file_name: str, document: Document) -> Optional[DocumentSc
         # update the output value based on the key value
         if item_key.startswith("Date"):
             # ensure date is in correct format
-            date_info = item_value.split("-")
-            date_value = datetime(int(date_info[2]), int(date_info[0]), int(date_info[1]))
+            delimiter = "-"
+            if "/" in item_value:
+                delimiter = "/"
+
+            # ensure date is in correct format
+            date_info = item_value.split(delimiter)
+            if len(date_info) == 3:
+                date_year = int(date_info[2])
+                date_month = int(date_info[0])
+                date_day = int(date_info[1])
+            elif len(date_info) == 2:
+                date_year = int(date_info[1])
+                date_month = int(date_info[0])
+                date_day = 1
+            else:
+                logger.error(
+                    "docx_parse_client: Unable to parse date value [%s][%s].", item_key, item_value
+                )
+                continue
+
+            # ensure year value is correct
+            if date_year < 1900:
+                date_year += 2000
+
+            # compute the date value
+            date_value = datetime(date_year, date_month, date_day)
             if "Birth" not in item_key:
                 # update the assessment date
                 doc_data.assessment_date = datetime.strftime(date_value, "%Y-%m-%d")
@@ -92,20 +127,21 @@ def docx_parse_client(file_name: str, document: Document) -> Optional[DocumentSc
                     str(doc_data.assessment_date), str(doc_data.client_dob)
                 )
 
-        elif item_key.startwith("Client"):
+        elif item_key.startswith("Client"):
             doc_data.client_name = item_value
-        elif item_key.startwith("Grade"):
+        elif item_key.startswith("Grade"):
             doc_data.client_grade = get_grade(item_value)
-        elif item_key.startwith("From"):
+        elif item_key.startswith("From"):
             doc_data.assessment_author = item_value
 
     return doc_data
 
 
-def docx_parse_sections(file_name: str, sections_defn: Dict) -> Dict:
+def docx_parse_sections(file_name: str, document: Document, sections_defn: Dict) -> Dict:
+    # determine the section delimiter values
     sections_text = [item["text"] for item in sections_defn]
-    document = Document(file_name)
 
+    # loop through all the document paragraphs
     doc_sections = {}
     section_index: int = 0
     section_data: Optional[List] = None
