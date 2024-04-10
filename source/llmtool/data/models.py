@@ -20,7 +20,8 @@ class DocumentSchema(LanceModel):
 
 class SectionSchema(LanceModel):
     assessment_uuid: str
-    # assessment_author: Optional[str]
+    client_grade: Optional[int]
+    client_age: Optional[float]
     section: str
     text: str
     vector: Vector(EMBEDDING_MODEL_LENGTH)

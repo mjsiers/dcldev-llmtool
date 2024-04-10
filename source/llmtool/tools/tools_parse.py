@@ -96,6 +96,8 @@ def docx_parse_client(file_name: str, document: Document) -> Optional[DocumentSc
             doc_data.client_name = item_value
         elif item_key.startwith("Grade"):
             doc_data.client_grade = get_grade(item_value)
+        elif item_key.startwith("From"):
+            doc_data.assessment_author = item_value
 
     return doc_data
 

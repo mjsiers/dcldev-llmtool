@@ -78,6 +78,8 @@ def database_embed_sections(db: lancedb.DBConnection, doc_name: str, doc_section
         )
         section_data = SectionSchema(
             assessment_uuid=doc_uuid,
+            client_age=None,
+            client_grade=None,
             section=k,
             text=section_text,
             vector=result["embedding"],
