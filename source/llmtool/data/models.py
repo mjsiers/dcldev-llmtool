@@ -12,8 +12,10 @@ class DocumentSchema(LanceModel):
     assessment_file: str
     assessment_date: Optional[str] = None
     assessment_author: Optional[str] = None
-    client_grade: Optional[str] = None
-    client_age: Optional[str] = None
+    client_name: Optional[str] = None
+    client_dob: Optional[str] = None
+    client_grade: Optional[int] = None
+    client_age: Optional[float] = None
 
 
 class SectionSchema(LanceModel):
