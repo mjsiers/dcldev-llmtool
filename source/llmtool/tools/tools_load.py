@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import zipfile
 from typing import Dict, Optional
 
 import fsspec
@@ -109,7 +110,33 @@ def load_assessment_files(filepath: str, sections_data: Dict, tables_data: Dict)
                 continue
 
             # parse out the different sections
-            doc_sections = docx_parse_sections(item, document, sections_data)
+            doc_sections = docx_parse_sections(document, sections_data)
             if (doc_sections is not None) and (len(doc_sections) > 0):
                 # create all the required embeddings from this document
                 database_embed_sections(db, doc_client, doc_sections)
+
+    elif file_iszip:
+        # get a list of all the files in the zip archive
+        with zipfile.ZipFile(filepath, "r") as zf:
+            for f in zf.namelist():
+                # ensure only try and parse the docx files
+                if f.endswith(".docx"):
+                    # get the document
+                    with zf.open(f, "r") as fp:
+                        # get the document basename and load the document
+                        file_basename = os.path.basename(f)
+                        document = Document(fp)
+
+                        # try parsing out the client info
+                        doc_client = docx_parse_client(file_basename, document)
+                        if doc_client is None:
+                            logger.warning(
+                                "load_assessment_files: [%s] was unable to parse client info.", item
+                            )
+                            continue
+
+                        # parse out the different sections
+                        doc_sections = docx_parse_sections(document, sections_data)
+                        if (doc_sections is not None) and (len(doc_sections) > 0):
+                            # create all the required embeddings from this document
+                            database_embed_sections(db, doc_client, doc_sections)

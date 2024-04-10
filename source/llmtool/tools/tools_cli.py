@@ -15,13 +15,15 @@ def tools(ctx):
     logger.info("tools:")
 
 
+# default_folder = "./data/assessments/clients"
+# default_zipfile = "./data/assessments/clients-20240410.zip"
 @tools.command("load", context_settings={"show_default": True})
 @click.pass_context
 @click.option(
     "--datapath",
     type=str,
     default="./data/assessments/clients",
-    help="Folder with assessment files.",
+    help="Folder or zip file with assessment files.",
 )
 @click.option(
     "--filepath", type=str, default="./data", help="Default file path for template files."

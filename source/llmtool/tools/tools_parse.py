@@ -137,7 +137,7 @@ def docx_parse_client(file_name: str, document: Document) -> Optional[DocumentSc
     return doc_data
 
 
-def docx_parse_sections(file_name: str, document: Document, sections_defn: Dict) -> Dict:
+def docx_parse_sections(document: Document, sections_defn: Dict) -> Dict:
     # determine the section delimiter values
     sections_text = [item["text"] for item in sections_defn]
 
