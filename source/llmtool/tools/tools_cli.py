@@ -3,7 +3,12 @@ import logging
 import click
 
 from ..settings import load_config
-from .tools_load import load_assessment_files, load_template_file
+from .tools_load import (
+    load_assessment_files,
+    load_template_file,
+    load_template_keywords,
+    save_dataframe,
+)
 
 # configure logging
 logger = logging.getLogger(__name__)
@@ -35,11 +40,16 @@ def tools(ctx):
 @click.option(
     "--tables", type=str, default="template_tables.json", help="Template tables JSON file."
 )
-def load(ctx, datapath: str, filepath: str, sections: str, tables: str):
+@click.option(
+    "--keywords", type=str, default="template_keywords.csv", help="Template keywords CSV file."
+)
+@click.option("--output", type=str, default="assessment_info.csv", help="Output info CSV file.")
+def load(ctx, datapath: str, filepath: str, sections: str, tables: str, keywords: str, output: str):
     logger.info("load: DATAPATH[%s]", datapath)
     logger.info("load: FILEPATH[%s]", filepath)
     logger.info("load: SECTIONS[%s]", sections)
     logger.info("load: TABLES[%s]", tables)
+    logger.info("load: KEYWORDS[%s]", keywords)
 
     # load the global settings configuration file
     load_config()
@@ -54,8 +64,17 @@ def load(ctx, datapath: str, filepath: str, sections: str, tables: str):
     logger.info("load: SECTIONS[%s]", len(sections_data))
     logger.info("load: TABLES[%s]", len(tables_data))
 
+    # load the template keywords definitions
+    list_keywords = load_template_keywords(filepath, keywords)
+    if list_keywords is None:
+        logger.error("load: Unable to load the required keywords template file.")
+        return
+
     # load the assessment files found in the specified location
-    load_assessment_files(datapath, sections_data, tables_data)
+    df_data = load_assessment_files(datapath, list_keywords, sections_data, tables_data)
+    if (output is not None) and (df_data is not None):
+        # save the clients into a CSV file
+        save_dataframe(filepath, output, df_data)
 
 
 @tools.command("search", context_settings={"show_default": True})

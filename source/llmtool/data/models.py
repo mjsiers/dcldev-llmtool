@@ -12,6 +12,9 @@ class DocumentSchema(LanceModel):
     assessment_file: str
     assessment_date: Optional[str] = None
     assessment_author: Optional[str] = None
+    assessment_initials: Optional[str] = None
+    assessment_reasons: Optional[str] = None
+    assessment_keywords: Optional[str] = None
     client_name: Optional[str] = None
     client_dob: Optional[str] = None
     client_grade: Optional[int] = None

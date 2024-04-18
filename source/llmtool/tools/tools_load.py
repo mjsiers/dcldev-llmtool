@@ -2,9 +2,10 @@ import json
 import logging
 import os
 import zipfile
-from typing import Dict, Optional
+from typing import Dict, List, Optional, Tuple
 
 import fsspec
+import pandas as pd
 from docx import Document
 
 from ..data.models import DocumentSchema
@@ -71,13 +72,129 @@ def load_template_file(filepath: str, filename: str) -> Optional[Dict]:
     return json_dict
 
 
-def load_assessment_files(filepath: str, sections_data: Dict, tables_data: Dict) -> None:
+def load_template_keywords(filepath: str, filename: str) -> Optional[List[str]]:
+    # determine what file system type to use
+    fs = fsspec.filesystem("file")
+    if filepath.startswith("s3"):
+        fs = fsspec.filesystem("s3")
+        filepath = filepath.replace("s3://", "")
+
+    # ensure the specified file resource exists
+    file_resource = os.path.join(filepath, filename)
+    file_exists = fs.exists(file_resource)
+    file_valid = fs.isfile(file_resource)
+    if not file_exists or not file_valid:
+        logger.error("load_template_keywords: [%s] was not found.", file_resource)
+        return None
+
+    # read the keywords template CSV file
+    list_keywords: Optional[List[str]] = None
+    with fs.open(file_resource) as fdata:
+        df_keywords = pd.read_csv(fdata)
+        logger.info("load_template_keywords: [%s] read in.", df_keywords.shape)
+        if not df_keywords.empty and "keywords" in df_keywords:
+            list_keywords = df_keywords["keywords"].tolist()
+
+    return list_keywords
+
+
+def save_dataframe(filepath: str, filename: str, df_data: pd.DataFrame):
+    # save the dataframe to a CSV file
+    file_resource = os.path.join(filepath, filename)
+    df_data.to_csv(file_resource, index=False)
+    logger.info("save_dataframe: [%s] [%s].", file_resource, df_data.shape)
+
+
+def parse_key_reasons(list_keywords: List[str], list_reasons: List[str]) -> Tuple[str, str]:
+    key_reasons: List[str] = []
+    missing_words: List[str] = []
+    ignore_words: List[str] = [
+        "and",
+        "or",
+        "of",
+        "in",
+        "to",
+        "too",
+        "at",
+        "when",
+        "with",
+        "for",
+        "her",
+        "him",
+        "while",
+    ]
+    delimiter: str = ""
+
+    # loop through all the lines of text in the key reasons section
+    # skip over the first line since it does not contain any keywords
+    full_text = ""
+    for line in list_reasons[1:]:
+        # check to see if the current line contains a period
+        if "." in line:
+            break
+
+        # add the current line to the full text variable
+        full_text += line + "\n"
+
+        # split the reason into separate words
+        if "," in line:
+            list_words = []
+            list_items = line.split(",")
+            for item in list_items:
+                if " " in item:
+                    list_words.extend(item.split(" "))
+                else:
+                    list_words.append(item)
+        elif "/" in line:
+            list_words = []
+            list_items = line.split("/")
+            for item in list_items:
+                if " " in item:
+                    list_words.extend(item.split(" "))
+                else:
+                    list_words.append(item)
+        else:
+            list_words = line.split(" ")
+
+        for word in list_words:
+            # convert word to lower case
+            word = word.lower().strip()
+            if word.startswith("and"):
+                word.replace("and", "")
+                word = word.strip()
+
+            if len(word) > 1:
+                # check to see if the word is in the list of keywords
+                if word in list_keywords:
+                    key_reasons.append(word)
+                else:
+                    if word not in ignore_words:
+                        missing_words.append(word)
+
+    # compute the reasons text string
+    reasons_text = "|".join(key_reasons)
+    logger.debug("parse_key_reasons: full text length [%s].", len(full_text))
+    logger.debug(
+        "parse_key_reasons: key words [%s] with length [%s].", len(key_reasons), len(reasons_text)
+    )
+
+    # check to see if we were missing any words
+    if len(missing_words) > 0:
+        missing_text = "|".join(missing_words)
+        logger.info("parse_key_reasons: Missing [%s] words [%s].", len(missing_words), missing_text)
+
+    return (full_text, reasons_text)
+
+
+def load_assessment_files(
+    filepath: str, list_keywords: List[str], sections_data: Dict, tables_data: Dict
+) -> Optional[pd.DataFrame]:
     # ensure the specified file exists
     fs = fsspec.filesystem("file")
     file_exists = fs.exists(filepath)
     if not file_exists:
         logger.error("load_assessment_files: [%s] does not exist.", filepath)
-        return
+        return None
 
     # check to see we are processing a zip archive file or a folder of files
     file_iszip = filepath.lower().endswith(".zip")
@@ -87,7 +204,7 @@ def load_assessment_files(filepath: str, sections_data: Dict, tables_data: Dict)
     )
     if (not file_iszip) and (not file_folder):
         logger.error("load_assessment_files: [%s] is not a zip archive or folder.", filepath)
-        return
+        return None
 
     # initialize the database and drop all existing tables
     db = database_connect()
@@ -96,6 +213,7 @@ def load_assessment_files(filepath: str, sections_data: Dict, tables_data: Dict)
     total_files = 0
     valid_files = 0
 
+    list_clients = []
     if file_folder:
         # get a list of all the docx files
         list_files = fs.ls(filepath, details=False)
@@ -115,9 +233,18 @@ def load_assessment_files(filepath: str, sections_data: Dict, tables_data: Dict)
             # parse out the different sections
             doc_sections = docx_parse_sections(document, sections_data)
             if (doc_sections is not None) and (len(doc_sections) > 0):
+                # get the key reasons for the assessment
+                if "key-reasons" in doc_sections:
+                    reasons, keywords = parse_key_reasons(
+                        list_keywords, doc_sections["key-reasons"]
+                    )
+                    doc_client.assessment_reasons = reasons
+                    doc_client.assessment_keywords = keywords
+
                 # create all the required embeddings from this document
                 database_embed_sections(db, doc_client, doc_sections)
                 valid_files += 1
+                list_clients.append(doc_client.model_dump())
 
     elif file_iszip:
         # get a list of all the files in the zip archive
@@ -144,10 +271,27 @@ def load_assessment_files(filepath: str, sections_data: Dict, tables_data: Dict)
                         # parse out the different sections
                         doc_sections = docx_parse_sections(document, sections_data)
                         if (doc_sections is not None) and (len(doc_sections) > 0):
+                            # get the key reasons for the assessment
+                            if "key-reasons" in doc_sections:
+                                reasons, keywords = parse_key_reasons(
+                                    list_keywords, doc_sections["key-reasons"]
+                                )
+                                doc_client.assessment_reasons = reasons
+                                doc_client.assessment_keywords = keywords
+
                             # create all the required embeddings from this document
                             database_embed_sections(db, doc_client, doc_sections)
                             valid_files += 1
+                            list_clients.append(doc_client.model_dump())
 
     logger.info(
         "load_assessment_files: Loaded [%s / %s] assessment files.", valid_files, total_files
     )
+    if len(list_clients) == 0:
+        return None
+
+    # build up dataframe with the client info
+    df_clients = pd.DataFrame.from_dict(list_clients)
+    df_clients.drop(columns=["assessment_file", "assessment_author", "client_name"], inplace=True)
+    logger.info("load_assessment_files: Client dataframe [%s].", df_clients.shape)
+    return df_clients

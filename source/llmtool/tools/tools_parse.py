@@ -169,7 +169,10 @@ def docx_parse_client(file_name: str, document: Document) -> Optional[DocumentSc
         elif item_key.startswith("Grade"):
             doc_data.client_grade = get_grade(item_value)
         elif item_key.startswith("From"):
+            item_splits = item_value.split(" ")
+            item_initials = [item[0] for item in item_splits if len(item) > 0]
             doc_data.assessment_author = item_value
+            doc_data.assessment_initials = "".join(item_initials)
 
     return doc_data
 
