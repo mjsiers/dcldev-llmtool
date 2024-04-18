@@ -2,13 +2,13 @@ import json
 import logging
 import os
 import zipfile
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import fsspec
 import pandas as pd
 from docx import Document
 
-from ..data.models import DocumentSchema
+from ..data.models import DocumentSchema, SectionSchema
 from .tools_embed import (
     database_connect,
     database_create_tables,
@@ -187,6 +187,55 @@ def parse_key_reasons(dict_keywords: Dict[str, int], list_reasons: List[str]) ->
     return (full_text, reasons_text)
 
 
+def load_document(
+    file_basename: str,
+    file_obj: Any,
+    dict_keywords: Dict[str, int],
+    sections_data: Dict,
+    tables_data: Dict,
+) -> Optional[Tuple[DocumentSchema, Dict]]:
+    # get the document basename and load the document
+    document = Document(file_obj)
+
+    # try parsing out the client info
+    doc_client = docx_parse_client(file_basename, document)
+    if doc_client is None:
+        logger.warning("load_document: [%s] was unable to parse client info.", file_basename)
+        return None
+
+    # ensure the client has a valid age
+    if (doc_client.client_age is None) or (doc_client.client_age < 4):
+        logger.warning(
+            "load_document: [%s] was unable to parse client age [%s].",
+            file_basename,
+            doc_client.client_age,
+        )
+        return None
+
+    # parse out the different sections
+    doc_sections = docx_parse_sections(document, sections_data)
+    if (doc_sections is None) or (len(doc_sections) == 0):
+        logger.warning("load_document: [%s] unable to parse sections.", file_basename)
+        return None
+
+    # skip over any file that does not have the key reasons section
+    # first data retrival will be done using this information
+    if "key-reasons" not in doc_sections:
+        logger.warning("load_document: [%s] unable to parse key reasons.", file_basename)
+        return None
+
+    # get the key reasons for the assessment
+    reasons, keywords = parse_key_reasons(dict_keywords, doc_sections["key-reasons"])
+    if not reasons or not keywords:
+        logger.warning("load_document: [%s] key reasons are not specified.", file_basename)
+        return None
+
+    # update the client assessment reasons and keywords and return results
+    doc_client.assessment_reasons = reasons
+    doc_client.assessment_keywords = keywords
+    return (doc_client, doc_sections)
+
+
 def load_assessment_files(
     filepath: str, list_keywords: List[str], sections_data: Dict, tables_data: Dict
 ) -> Optional[Tuple[pd.DataFrame, pd.DataFrame]]:
@@ -224,51 +273,19 @@ def load_assessment_files(
         list_files = fs.ls(filepath, details=False)
         logger.info("load_assessment_files: [%s] has [%s] files.", filepath, len(list_files))
         for idx, item in enumerate(list_files):
-            # get the document basename and load the document
+            # load the current document
             file_basename = os.path.basename(item)
-            document = Document(item)
             total_files += 1
-
-            # try parsing out the client info
-            doc_client = docx_parse_client(file_basename, document)
-            if doc_client is None:
-                logger.warning("load_assessment_files: [%s] was unable to parse client info.", item)
+            results = load_document(file_basename, item, dict_keywords, sections_data, tables_data)
+            if results is None:
                 continue
 
-            # ensure the client has a valid age
-            if (doc_client.client_age is None) or (doc_client.client_age < 4):
-                logger.warning(
-                    "load_assessment_files: [%s] was unable to parse client age [%s].",
-                    item,
-                    doc_client.client_age,
-                )
-                continue
-
-            # parse out the different sections
-            doc_sections = docx_parse_sections(document, sections_data)
-            if (doc_sections is not None) and (len(doc_sections) > 0):
-                # skip over any file that does not have the key reasons section
-                # first data retrival will be done using this information
-                if "key-reasons" not in doc_sections:
-                    logger.warning("load_assessment_files: [%s] unable to parse key reasons.", item)
-                    continue
-
-                # get the key reasons for the assessment
-                reasons, keywords = parse_key_reasons(dict_keywords, doc_sections["key-reasons"])
-                if not reasons or not keywords:
-                    logger.warning(
-                        "load_assessment_files: [%s] key reasons are not specified.", item
-                    )
-                    continue
-
-                # update the client assessment reasons and keywords
-                doc_client.assessment_reasons = reasons
-                doc_client.assessment_keywords = keywords
-
-                # create all the required embeddings from this document
-                database_embed_sections(db, doc_client, doc_sections)
-                valid_files += 1
-                list_clients.append(doc_client.model_dump())
+            # create all the required embeddings from this document
+            doc_client = results[0]
+            doc_sections = results[1]
+            database_embed_sections(db, doc_client, doc_sections)
+            valid_files += 1
+            list_clients.append(doc_client.model_dump())
 
     elif file_iszip:
         # get a list of all the files in the zip archive
@@ -278,59 +295,21 @@ def load_assessment_files(
                 if f.endswith(".docx"):
                     # get the document
                     with zf.open(f, "r") as fp:
-                        # get the document basename and load the document
+                        # load the current document
                         file_basename = os.path.basename(f)
-                        document = Document(fp)
                         total_files += 1
-
-                        # try parsing out the client info
-                        doc_client = docx_parse_client(file_basename, document)
-                        if doc_client is None:
-                            logger.warning(
-                                "load_assessment_files: [%s] was unable to parse client info.",
-                                file_basename,
-                            )
+                        results = load_document(
+                            file_basename, fp, dict_keywords, sections_data, tables_data
+                        )
+                        if results is None:
                             continue
 
-                        # ensure the client has a valid age
-                        if (doc_client.client_age is None) or (doc_client.client_age < 4):
-                            logger.warning(
-                                "load_assessment_files: [%s] was unable to parse client age [%s].",
-                                file_basename,
-                                doc_client.client_age,
-                            )
-                            continue
-
-                        # parse out the different sections
-                        doc_sections = docx_parse_sections(document, sections_data)
-                        if (doc_sections is not None) and (len(doc_sections) > 0):
-                            # skip over any file that does not have the key reasons section
-                            # first data retrival will be done using this information
-                            if "key-reasons" not in doc_sections:
-                                logger.warning(
-                                    "load_assessment_files: [%s] unable to parse key reasons.", item
-                                )
-                                continue
-
-                            # get the key reasons for the assessment
-                            reasons, keywords = parse_key_reasons(
-                                dict_keywords, doc_sections["key-reasons"]
-                            )
-                            if not reasons or not keywords:
-                                logger.warning(
-                                    "load_assessment_files: [%s] key reasons are not specified.",
-                                    file_basename,
-                                )
-                                continue
-
-                            # update the client assessment reasons and keywords
-                            doc_client.assessment_reasons = reasons
-                            doc_client.assessment_keywords = keywords
-
-                            # create all the required embeddings from this document
-                            database_embed_sections(db, doc_client, doc_sections)
-                            valid_files += 1
-                            list_clients.append(doc_client.model_dump())
+                        # create all the required embeddings from this document
+                        doc_client = results[0]
+                        doc_sections = results[1]
+                        database_embed_sections(db, doc_client, doc_sections)
+                        valid_files += 1
+                        list_clients.append(doc_client.model_dump())
 
     logger.info(
         "load_assessment_files: Loaded [%s / %s] assessment files.", valid_files, total_files

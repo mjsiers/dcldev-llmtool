@@ -74,7 +74,10 @@ def docx_parse_client(file_name: str, document: Document) -> Optional[DocumentSc
 
     # initialize the document schema values
     doc_uuid = str(uuid.uuid4())
-    doc_data = DocumentSchema(assessment_uuid=doc_uuid, assessment_file=file_name)
+    doc_data = DocumentSchema(
+        assessment_uuid=doc_uuid,
+        assessment_file=file_name,
+    )
 
     # get list of the unique strings from each cell in the table
     list_info = []
