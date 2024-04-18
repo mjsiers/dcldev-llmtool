@@ -43,8 +43,25 @@ def tools(ctx):
 @click.option(
     "--keywords", type=str, default="template_keywords.csv", help="Template keywords CSV file."
 )
-@click.option("--output", type=str, default="assessment_info.csv", help="Output info CSV file.")
-def load(ctx, datapath: str, filepath: str, sections: str, tables: str, keywords: str, output: str):
+@click.option(
+    "--clients", type=str, default="client_info.csv", help="Clients output info CSV file."
+)
+@click.option(
+    "--reasons",
+    type=str,
+    default="client_reasons_info.csv",
+    help="Client reasons output info CSV file.",
+)
+def load(
+    ctx,
+    datapath: str,
+    filepath: str,
+    sections: str,
+    tables: str,
+    keywords: str,
+    clients: str,
+    reasons: str,
+):
     logger.info("load: DATAPATH[%s]", datapath)
     logger.info("load: FILEPATH[%s]", filepath)
     logger.info("load: SECTIONS[%s]", sections)
@@ -71,10 +88,15 @@ def load(ctx, datapath: str, filepath: str, sections: str, tables: str, keywords
         return
 
     # load the assessment files found in the specified location
-    df_data = load_assessment_files(datapath, list_keywords, sections_data, tables_data)
-    if (output is not None) and (df_data is not None):
+    df_clients, df_reasons = load_assessment_files(
+        datapath, list_keywords, sections_data, tables_data
+    )
+    if (clients is not None) and (df_clients is not None):
         # save the clients into a CSV file
-        save_dataframe(filepath, output, df_data)
+        save_dataframe(filepath, clients, df_clients)
+    if (reasons is not None) and (df_reasons is not None):
+        # save the client reasons into a CSV file
+        save_dataframe(filepath, reasons, df_reasons, index=True)
 
 
 @tools.command("search", context_settings={"show_default": True})

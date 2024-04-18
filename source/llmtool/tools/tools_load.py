@@ -98,14 +98,14 @@ def load_template_keywords(filepath: str, filename: str) -> Optional[List[str]]:
     return list_keywords
 
 
-def save_dataframe(filepath: str, filename: str, df_data: pd.DataFrame):
+def save_dataframe(filepath: str, filename: str, df_data: pd.DataFrame, index: bool = False):
     # save the dataframe to a CSV file
     file_resource = os.path.join(filepath, filename)
-    df_data.to_csv(file_resource, index=False)
+    df_data.to_csv(file_resource, index=index)
     logger.info("save_dataframe: [%s] [%s].", file_resource, df_data.shape)
 
 
-def parse_key_reasons(list_keywords: List[str], list_reasons: List[str]) -> Tuple[str, str]:
+def parse_key_reasons(dict_keywords: Dict[str, int], list_reasons: List[str]) -> Tuple[str, str]:
     key_reasons: List[str] = []
     missing_words: List[str] = []
     ignore_words: List[str] = [
@@ -165,8 +165,9 @@ def parse_key_reasons(list_keywords: List[str], list_reasons: List[str]) -> Tupl
 
             if len(word) > 1:
                 # check to see if the word is in the list of keywords
-                if word in list_keywords:
+                if word in dict_keywords:
                     key_reasons.append(word)
+                    dict_keywords[word] += 1
                 else:
                     if word not in ignore_words:
                         missing_words.append(word)
@@ -188,7 +189,7 @@ def parse_key_reasons(list_keywords: List[str], list_reasons: List[str]) -> Tupl
 
 def load_assessment_files(
     filepath: str, list_keywords: List[str], sections_data: Dict, tables_data: Dict
-) -> Optional[pd.DataFrame]:
+) -> Optional[Tuple[pd.DataFrame, pd.DataFrame]]:
     # ensure the specified file exists
     fs = fsspec.filesystem("file")
     file_exists = fs.exists(filepath)
@@ -212,6 +213,10 @@ def load_assessment_files(
     database_create_tables(db)
     total_files = 0
     valid_files = 0
+
+    # initialize the dictionary of keywords
+    # the dictionary will hold the number of times each keyword was found
+    dict_keywords: Dict[str, int] = dict.fromkeys(list_keywords, 0)
 
     list_clients = []
     if file_folder:
@@ -249,7 +254,7 @@ def load_assessment_files(
                     continue
 
                 # get the key reasons for the assessment
-                reasons, keywords = parse_key_reasons(list_keywords, doc_sections["key-reasons"])
+                reasons, keywords = parse_key_reasons(dict_keywords, doc_sections["key-reasons"])
                 if not reasons or not keywords:
                     logger.warning(
                         "load_assessment_files: [%s] key reasons are not specified.", item
@@ -309,7 +314,7 @@ def load_assessment_files(
 
                             # get the key reasons for the assessment
                             reasons, keywords = parse_key_reasons(
-                                list_keywords, doc_sections["key-reasons"]
+                                dict_keywords, doc_sections["key-reasons"]
                             )
                             if not reasons or not keywords:
                                 logger.warning(
@@ -333,8 +338,19 @@ def load_assessment_files(
     if len(list_clients) == 0:
         return None
 
+    # determine the total number of times the keywords were found
+    total_words = 0
+    for k, v in dict_keywords.items():
+        total_words += v
+
+    # convert the dictionary of keywords into a pandas dataframe
+    df_keywords = pd.DataFrame.from_dict(dict_keywords, orient="index", columns=["count"])
+    df_keywords.sort_values(by=["count"], ascending=False, inplace=True)
+    df_keywords.index.name = "keyword"
+    df_keywords["percent"] = (df_keywords["count"] / total_words) * 100
+
     # build up dataframe with the client info
     df_clients = pd.DataFrame.from_dict(list_clients)
     df_clients.drop(columns=["assessment_file", "assessment_author", "client_name"], inplace=True)
     logger.info("load_assessment_files: Client dataframe [%s].", df_clients.shape)
-    return df_clients
+    return (df_clients, df_keywords)
