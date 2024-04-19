@@ -17,6 +17,9 @@ site
 
 # exclude test assessment files
 data/assessments/clients
+data/assessments/*.zip
+data/client_*.csv
+data/client_*.json
 
 # exclude local vector store files
 data/vectors
