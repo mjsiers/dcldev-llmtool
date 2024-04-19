@@ -19,6 +19,7 @@ class DocumentSchema(LanceModel):
     client_dob: Optional[str] = None
     client_grade: Optional[int] = None
     client_age: Optional[float] = None
+    vector: Vector(EMBEDDING_MODEL_LENGTH)
 
 
 class SectionSchema(LanceModel):

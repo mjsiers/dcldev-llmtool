@@ -1,6 +1,6 @@
 import logging
 import os
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 import lancedb
 import numpy as np
@@ -42,6 +42,15 @@ def database_create_tables(db: lancedb.DBConnection) -> None:
         db.create_table(lancedb_section_table, schema=SectionSchema)
 
 
+def embed_text(input_text: str) -> Optional[Any]:
+    result = ollama.embeddings(model=ollama_model_embed, prompt=input_text)
+    if (result is None) or ("embedding" not in result):
+        logger.error("embed_text: Embedding model [%s] failed.", ollama_model_embed)
+        return None
+
+    return result["embedding"]
+
+
 def database_embed_sections(
     db: lancedb.DBConnection, doc_data: DocumentSchema, doc_sections: Dict
 ) -> None:
@@ -66,7 +75,15 @@ def database_embed_sections(
 
         # join all the section text strings and compute the vector embedding value for this section text
         section_text = "\n".join(v)
-        result = ollama.embeddings(model=ollama_model_embed, prompt=section_text)
+        # result = ollama.embeddings(model=ollama_model_embed, prompt=section_text)
+        vector = embed_text(section_text)
+        if vector is None:
+            logger.error(
+                "database_embed_sections: Embedding of [%s] section [%s] failed.",
+                doc_data.assessment_file,
+                k,
+            )
+            continue
 
         # initialize the section data using the pydantic mode
         # save the model into the local list as a dictionary
@@ -82,7 +99,7 @@ def database_embed_sections(
             client_grade=doc_data.client_grade,
             section=k,
             text=section_text,
-            vector=result["embedding"],
+            vector=vector,
         )
         list_sections.append(section_data.model_dump())
 

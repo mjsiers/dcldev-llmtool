@@ -1,12 +1,12 @@
-import json
 import logging
 import uuid
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 from docx import Document
 
 from ..data.models import DocumentSchema
+from .tools_embed import embed_text
 
 # configure logging
 logger = logging.getLogger(__name__)
@@ -56,7 +56,99 @@ def get_grade(grade: str) -> Optional[int]:
     return int(grade)
 
 
-def docx_parse_client(file_name: str, document: Document) -> Optional[DocumentSchema]:
+def parse_key_reasons(dict_keywords: Dict[str, int], list_reasons: List[str]) -> Tuple[str, str]:
+    key_reasons: List[str] = []
+    missing_words: List[str] = []
+    ignore_words: List[str] = [
+        "and",
+        "or",
+        "of",
+        "in",
+        "to",
+        "too",
+        "at",
+        "when",
+        "with",
+        "for",
+        "her",
+        "him",
+        "while",
+    ]
+    delimiter: str = ""
+
+    # loop through all the lines of text in the key reasons section
+    # goal is to parse out just the bullet points from this section
+    # skip over the first line since it does not contain any keywords
+    full_text = ""
+    for line in list_reasons[1:]:
+        # check to see if the current line contains a period
+        if "." in line:
+            # consider this the end of the bullet points in the section
+            # bullet points are usually followed by some text sentences
+            break
+
+        # add the current line to the full text variable
+        full_text += line + "\n"
+
+        # split the reason into separate words
+        if "," in line:
+            list_words = []
+            list_items = line.split(",")
+            for item in list_items:
+                if " " in item:
+                    list_words.extend(item.split(" "))
+                else:
+                    list_words.append(item)
+        elif "/" in line:
+            list_words = []
+            list_items = line.split("/")
+            for item in list_items:
+                if " " in item:
+                    list_words.extend(item.split(" "))
+                else:
+                    list_words.append(item)
+        else:
+            list_words = line.split(" ")
+
+        # loop through all the words in the current line
+        for word in list_words:
+            # convert word to lower case
+            word = word.lower().strip()
+            if word.startswith("and"):
+                word.replace("and", "")
+                word = word.strip()
+
+            if len(word) > 1:
+                # check to see if the word is in the dictionary of keywords
+                if word in dict_keywords:
+                    # add word to the list and increment the count
+                    key_reasons.append(word)
+                    dict_keywords[word] += 1
+                else:
+                    # check to see if we can ignore the missing word
+                    if word not in ignore_words:
+                        # add word to the list of missing words from dictionary
+                        missing_words.append(word)
+
+    # compute the reasons text string
+    reasons_text = "|".join(key_reasons)
+    logger.debug("parse_key_reasons: full text length [%s].", len(full_text))
+    logger.debug(
+        "parse_key_reasons: key words [%s] with length [%s].", len(key_reasons), len(reasons_text)
+    )
+
+    # check to see if there were any missing words
+    if len(missing_words) > 0:
+        missing_text = "|".join(missing_words)
+        logger.info("parse_key_reasons: Missing [%s] words [%s].", len(missing_words), missing_text)
+
+    # return the full text of bullet points and the list of keywords found
+    return (full_text, reasons_text)
+
+
+def docx_parse_client(
+    file_name: str, document: Document, reasons: str, keywords: str
+) -> Optional[DocumentSchema]:
     # ensure the document has at least one table
     if len(document.tables) == 0:
         logger.error("docx_parse_client: [%s] does not have any tables.", file_name)
@@ -73,10 +165,14 @@ def docx_parse_client(file_name: str, document: Document) -> Optional[DocumentSc
         return None
 
     # initialize the document schema values
+    doc_vector = embed_text(reasons)
     doc_uuid = str(uuid.uuid4())
     doc_data = DocumentSchema(
         assessment_uuid=doc_uuid,
         assessment_file=file_name,
+        assessment_reasons=reasons,
+        assessment_keywords=keywords,
+        vector=doc_vector,
     )
 
     # get list of the unique strings from each cell in the table

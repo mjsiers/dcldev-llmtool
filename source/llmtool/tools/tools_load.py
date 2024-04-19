@@ -15,7 +15,7 @@ from .tools_embed import (
     database_drop_tables,
     database_embed_sections,
 )
-from .tools_parse import docx_parse_client, docx_parse_sections
+from .tools_parse import docx_parse_client, docx_parse_sections, parse_key_reasons
 
 # configure logging
 logger = logging.getLogger(__name__)
@@ -105,88 +105,6 @@ def save_dataframe(filepath: str, filename: str, df_data: pd.DataFrame, index: b
     logger.info("save_dataframe: [%s] [%s].", file_resource, df_data.shape)
 
 
-def parse_key_reasons(dict_keywords: Dict[str, int], list_reasons: List[str]) -> Tuple[str, str]:
-    key_reasons: List[str] = []
-    missing_words: List[str] = []
-    ignore_words: List[str] = [
-        "and",
-        "or",
-        "of",
-        "in",
-        "to",
-        "too",
-        "at",
-        "when",
-        "with",
-        "for",
-        "her",
-        "him",
-        "while",
-    ]
-    delimiter: str = ""
-
-    # loop through all the lines of text in the key reasons section
-    # skip over the first line since it does not contain any keywords
-    full_text = ""
-    for line in list_reasons[1:]:
-        # check to see if the current line contains a period
-        if "." in line:
-            break
-
-        # add the current line to the full text variable
-        full_text += line + "\n"
-
-        # split the reason into separate words
-        if "," in line:
-            list_words = []
-            list_items = line.split(",")
-            for item in list_items:
-                if " " in item:
-                    list_words.extend(item.split(" "))
-                else:
-                    list_words.append(item)
-        elif "/" in line:
-            list_words = []
-            list_items = line.split("/")
-            for item in list_items:
-                if " " in item:
-                    list_words.extend(item.split(" "))
-                else:
-                    list_words.append(item)
-        else:
-            list_words = line.split(" ")
-
-        for word in list_words:
-            # convert word to lower case
-            word = word.lower().strip()
-            if word.startswith("and"):
-                word.replace("and", "")
-                word = word.strip()
-
-            if len(word) > 1:
-                # check to see if the word is in the list of keywords
-                if word in dict_keywords:
-                    key_reasons.append(word)
-                    dict_keywords[word] += 1
-                else:
-                    if word not in ignore_words:
-                        missing_words.append(word)
-
-    # compute the reasons text string
-    reasons_text = "|".join(key_reasons)
-    logger.debug("parse_key_reasons: full text length [%s].", len(full_text))
-    logger.debug(
-        "parse_key_reasons: key words [%s] with length [%s].", len(key_reasons), len(reasons_text)
-    )
-
-    # check to see if we were missing any words
-    if len(missing_words) > 0:
-        missing_text = "|".join(missing_words)
-        logger.info("parse_key_reasons: Missing [%s] words [%s].", len(missing_words), missing_text)
-
-    return (full_text, reasons_text)
-
-
 def load_document(
     file_basename: str,
     file_obj: Any,
@@ -196,21 +114,6 @@ def load_document(
 ) -> Optional[Tuple[DocumentSchema, Dict]]:
     # get the document basename and load the document
     document = Document(file_obj)
-
-    # try parsing out the client info
-    doc_client = docx_parse_client(file_basename, document)
-    if doc_client is None:
-        logger.warning("load_document: [%s] was unable to parse client info.", file_basename)
-        return None
-
-    # ensure the client has a valid age
-    if (doc_client.client_age is None) or (doc_client.client_age < 4):
-        logger.warning(
-            "load_document: [%s] was unable to parse client age [%s].",
-            file_basename,
-            doc_client.client_age,
-        )
-        return None
 
     # parse out the different sections
     doc_sections = docx_parse_sections(document, sections_data)
@@ -230,9 +133,23 @@ def load_document(
         logger.warning("load_document: [%s] key reasons are not specified.", file_basename)
         return None
 
+    # try parsing out the client info
+    doc_client = docx_parse_client(file_basename, document, reasons, keywords)
+    if doc_client is None:
+        logger.warning("load_document: [%s] was unable to parse client info.", file_basename)
+        return None
+
+    # ensure the client has a valid age
+    if (doc_client.client_age is None) or (doc_client.client_age < 4):
+        logger.warning(
+            "load_document: [%s] was unable to parse client age [%s].",
+            file_basename,
+            doc_client.client_age,
+        )
+        return None
+
     # update the client assessment reasons and keywords and return results
-    doc_client.assessment_reasons = reasons
-    doc_client.assessment_keywords = keywords
+
     return (doc_client, doc_sections)
 
 
