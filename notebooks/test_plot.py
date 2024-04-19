@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 
-
 #%%
 clients_reasons_filename = "../data/client_reasons_info.csv"
 df_reasons = pd.read_csv(clients_reasons_filename)
