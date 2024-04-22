@@ -3,6 +3,7 @@ from typing import Optional
 
 import click
 
+from ..data.query import search_embeddings, search_keywords
 from ..settings import load_config
 from .tools_load import (
     load_assessment_files,
@@ -10,7 +11,6 @@ from .tools_load import (
     load_template_keywords,
     save_dataframe,
 )
-from .tools_search import search_embeddings, search_keywords
 
 # configure logging
 logger = logging.getLogger(__name__)
