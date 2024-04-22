@@ -9,6 +9,7 @@ from .tools_load import (
     load_template_keywords,
     save_dataframe,
 )
+from .tools_search import search_embeddings
 
 # configure logging
 logger = logging.getLogger(__name__)
@@ -101,8 +102,16 @@ def load(
 
 @tools.command("search", context_settings={"show_default": True})
 @click.pass_context
-@click.option("--query", type=str, help="Query text.")
-@click.option("--table", type=str, help="Table name.")
-def search(ctx, query: str, table: str):
+@click.option("--query", default="self-esteem", type=str, help="Query text.")
+def search(ctx, query: str):
     logger.info("search: QUERY[%s]", query)
-    logger.info("search: TABLE[%s]", table)
+
+    # load the global settings configuration file
+    load_config()
+    df = search_embeddings(query)
+    if df is None:
+        logger.info("search: No result found.")
+        return
+
+    logger.info("search: Found [%s] results.", df.shape)
+    print(df.head(10))
