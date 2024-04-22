@@ -1,21 +1,12 @@
 import logging
-import os
 from typing import Any, Optional
 
 import click
 import gradio as gr
-import lancedb
-import ollama
 import pandas as pd
 
-from ..data.models import DocumentSchema, SectionSchema
-from ..settings import (
-    lancedb_assessment_table,
-    lancedb_database_name,
-    lancedb_database_path,
-    load_config,
-    ollama_model_embed,
-)
+from ..data.query import search_embeddings, search_keywords
+from ..settings import load_config
 
 # configure logging
 logger = logging.getLogger(__name__)
@@ -23,62 +14,49 @@ logger = logging.getLogger(__name__)
 
 # configure logging
 logger = logging.getLogger(__name__)
-
-
-def embed_text(input_text: str) -> Optional[Any]:
-    result = ollama.embeddings(model=ollama_model_embed, prompt=input_text)
-    if (result is None) or ("embedding" not in result):
-        logger.error("embed_text: Embedding model [%s] failed.", ollama_model_embed)
-        return None
-
-    return result["embedding"]
-
-
-def database_connect() -> lancedb.DBConnection:
-    vector_store = os.path.join(lancedb_database_path, lancedb_database_name)
-    db = lancedb.connect(vector_store)
-    return db
-
-
-def search_embeddings(query: str) -> Optional[pd.DataFrame]:
-    # embed the query text
-    query_vector = embed_text(query)
-    if query_vector is None:
-        return None
-
-    # connect to the database and get the specified table
-    db = database_connect()
-    tbl = db.open_table(lancedb_assessment_table)
-    df_result = tbl.search(query_vector).limit(9).to_df()
-    return df_result
 
 
 def launch_gui():
     with gr.Blocks() as demo:
         gr.Markdown(
             """
-                    # DCL Assessment Search with LanceDB
-                    The GUI provides the ability to search the data extracted from DCL Assessment reports. 
+                    # DCL Assessment Tool
+                    This tool provides the ability to search the data extracted from previous DCL Assessment reports. 
                     The data can be searched using either embeddings or keywords.
                     """
         )
         with gr.Row():
-            with gr.Tab("Embeddings"):
-                vector_query = gr.Textbox(value="low self-esteem", show_label=False)
-                b1 = gr.Button("Submit")
-            with gr.Tab("Keywords"):
-                keyword_query = gr.Textbox(value="low self-esteem", show_label=False)
-                b2 = gr.Button("Submit")
+            client_name = gr.Textbox(placeholder="Client Name", label="Client Name")
         with gr.Row():
-            query_results = gr.DataFrame()
-        # with gr.Row():
-        #    code = gr.Code(label="Code", language="python")
-        # with gr.Row():
-        #    gallery = gr.HTML()
+            client_reasons = gr.Textbox(
+                placeholder="Client Reasons", label="Key Reasons for Assessment"
+            )
+        with gr.Row():
+            with gr.Tab("Embeddings"):
+                button1 = gr.Button("Search Embeddings")
+                results1 = gr.DataFrame(type="pandas")
+                clear1 = gr.ClearButton(results1)
 
-        b1.click(search_embeddings, inputs=vector_query, outputs=[query_results])
-        # b2.click(find_video_keywords, inputs=keyword_query, outputs=[gallery, code])
-        # 3.click(find_video_sql, inputs=sql_query, outputs=[gallery, code])
+            with gr.Tab("Keywords"):
+                button2 = gr.Button("Search Keywords")
+                results2 = gr.DataFrame(type="pandas")
+                clear2 = gr.ClearButton(results2)
+
+        button1.click(search_embeddings, inputs=client_reasons, outputs=[results1])
+        button2.click(search_keywords, inputs=client_reasons, outputs=[results2])
+
+        # with gr.Row():
+        #    with gr.Tab("Embeddings"):
+        #        embedding_text = gr.Textbox(value="low confidence", show_label=False)
+        #        b1 = gr.Button("Submit")
+        #    with gr.Tab("Keywords"):
+        #        keywords_text = gr.Textbox(value="struggles reading", show_label=False)
+        #        b2 = gr.Button("Submit")
+        # with gr.Row():
+        #    query_results = gr.DataFrame(type="pandas")
+
+        # b1.click(search_embeddings, inputs=embedding_text, outputs=[query_results])
+        # b2.click(search_keywords, inputs=keywords_text, outputs=[query_results])
 
     demo.launch()
 
