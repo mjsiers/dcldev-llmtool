@@ -3,6 +3,7 @@ import sys
 
 import click
 
+from .gui.gui_cli import gui
 from .tools.tools_cli import tools
 
 # configure logging
@@ -21,3 +22,4 @@ def cli():
 
 
 cli.add_command(tools)
+cli.add_command(gui)
