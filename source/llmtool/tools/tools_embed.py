@@ -42,6 +42,11 @@ def database_create_tables(db: lancedb.DBConnection) -> None:
         db.create_table(lancedb_section_table, schema=SectionSchema)
 
 
+def database_create_fts(db: lancedb.DBConnection) -> None:
+    tbl_assessment = db.open_table(lancedb_assessment_table)
+    tbl_assessment.create_fts_index("assessment_keywords")
+
+
 def embed_text(input_text: str) -> Optional[Any]:
     result = ollama.embeddings(model=ollama_model_embed, prompt=input_text)
     if (result is None) or ("embedding" not in result):

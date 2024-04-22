@@ -1,4 +1,5 @@
 import logging
+from typing import Optional
 
 import click
 
@@ -9,7 +10,7 @@ from .tools_load import (
     load_template_keywords,
     save_dataframe,
 )
-from .tools_search import search_embeddings
+from .tools_search import search_embeddings, search_keywords
 
 # configure logging
 logger = logging.getLogger(__name__)
@@ -108,10 +109,23 @@ def search(ctx, query: str):
 
     # load the global settings configuration file
     load_config()
-    df = search_embeddings(query)
+
+    # first search using the embeddings
+    filter: Optional[str] = None
+    filter = "client_age < 19.0"
+    df = search_embeddings(query, filter_text=filter)
     if df is None:
         logger.info("search: No result found.")
         return
 
-    logger.info("search: Found [%s] results.", df.shape)
+    logger.info("search: Found [%s] embedding results.", df.shape)
+    print(df.head(10))
+
+    # now search using the keywords
+    df = search_keywords(query, filter_text=filter)
+    if df is None:
+        logger.info("search: No result found.")
+        return
+
+    logger.info("search: Found [%s] keyword results.", df.shape)
     print(df.head(10))

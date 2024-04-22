@@ -11,6 +11,7 @@ from docx import Document
 from ..data.models import DocumentSchema, SectionSchema
 from .tools_embed import (
     database_connect,
+    database_create_fts,
     database_create_tables,
     database_drop_tables,
     database_embed_sections,
@@ -233,6 +234,9 @@ def load_assessment_files(
     )
     if len(list_clients) == 0:
         return None
+
+    # create the full text search index on the keywords column
+    database_create_fts(db)
 
     # determine the total number of times the keywords were found
     total_words = 0
