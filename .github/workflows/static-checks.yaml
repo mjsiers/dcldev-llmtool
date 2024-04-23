@@ -11,10 +11,14 @@ jobs:
       - name: "Checkout Source Code"
         uses: actions/checkout@v3
 
-      - name: Set up the environment
+      - name: Setup Python Environment
         uses: ./.github/actions/setup-poetry-env
 
-      - name: Check Poetry lock file consistency
-        run: poetry lock --check
+      - name: Check Packages
+        run: make check-packages
 
-      - run: poetry --version
+      - name: Check Security
+        run: make check-security
+
+      - name: Check Code
+        run: make check-code
