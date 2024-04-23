@@ -22,7 +22,7 @@ def launch_gui():
             """
                     # DCL Assessment Tool
                     This tool provides the ability to search the data extracted from previous DCL Assessment reports. 
-                    The data can be searched using either embeddings or keywords.
+                    The data can be searched using either similarity or keywords.
                     """
         )
         with gr.Row():
@@ -32,7 +32,7 @@ def launch_gui():
                 placeholder="Client Reasons", label="Key Reasons for Assessment"
             )
         with gr.Row():
-            with gr.Tab("Embeddings"):
+            with gr.Tab("Similarity"):
                 button1 = gr.Button("Search Embeddings")
                 results1 = gr.DataFrame(type="pandas")
                 clear1 = gr.ClearButton(results1)
