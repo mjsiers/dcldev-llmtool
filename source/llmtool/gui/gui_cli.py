@@ -43,19 +43,6 @@ def launch_gui():
         button1.click(search_embeddings, inputs=client_reasons, outputs=[results1])
         button2.click(search_keywords, inputs=client_reasons, outputs=[results2])
 
-        # with gr.Row():
-        #    with gr.Tab("Embeddings"):
-        #        embedding_text = gr.Textbox(value="low confidence", show_label=False)
-        #        b1 = gr.Button("Submit")
-        #    with gr.Tab("Keywords"):
-        #        keywords_text = gr.Textbox(value="struggles reading", show_label=False)
-        #        b2 = gr.Button("Submit")
-        # with gr.Row():
-        #    query_results = gr.DataFrame(type="pandas")
-
-        # b1.click(search_embeddings, inputs=embedding_text, outputs=[query_results])
-        # b2.click(search_keywords, inputs=keywords_text, outputs=[query_results])
-
     demo.launch()
 
 
