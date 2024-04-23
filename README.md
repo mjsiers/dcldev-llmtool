@@ -15,7 +15,7 @@ output.
 
 - Existing client assessment reports are parsed, embedded, and saved into local vector database.
 - User provides information about the new client.
-- Vector database embeddings are searched for clients with similar conditions.
+- Vector database embeddings are searched for clients with similar descriptions and conditions.
 - The retrieved text blocks are then used as the context for generating the text for the new client.
 - Multiple AI agents are used to improve the quality of the generated text.
 - User can review the generated report text and suggest additional improvements.
