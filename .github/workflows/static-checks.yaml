@@ -10,9 +10,6 @@ jobs:
     steps:
       - name: "Checkout Source Code"
         uses: actions/checkout@v3
-        with:
-          # this is necessary so that we have the tags
-          fetch-depth:0
 
       - name: Set up the environment
         uses: ./.github/actions/setup-poetry-env
