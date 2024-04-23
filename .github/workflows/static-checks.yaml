@@ -9,7 +9,10 @@ jobs:
 
     steps:
       - name: "Checkout Source Code"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          # ensure the repository tags are available
+          fetch-tags: True
 
       - name: Setup Python Environment
         uses: ./.github/actions/setup-poetry-env
