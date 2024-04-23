@@ -46,6 +46,8 @@ ipykernel = "~6.29.4"
 [tool.poetry.group.lint.dependencies]
 ruff = "~0.3.7"
 mypy = "~1.9.0"
+bandit = "~1.7.8"
+deptry = "~0.16.1"
 
 [tool.poetry.group.docs.dependencies]
 mkdocs = "^1.5.3"
@@ -67,6 +69,16 @@ follow_imports = "skip"
 no_implicit_optional = true
 warn_no_return = true
 ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+pythonpath = ["source"]
+testpaths = ["tests"]
+
+[tool.bandit]
+exclude_dirs = ["tests"]
+
+[tool.deptry.per_rule_ignores]
+DEP002 = ["python-dotenv", "polars", "duckdb", "tantivy", "types-toml", "crewai"]
 
 [tool.ruff]
 line-length = 100

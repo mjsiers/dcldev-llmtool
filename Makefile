@@ -34,9 +34,16 @@ patch: ## Update code using quality tools.
 check-packages: ## Run package quality tools.
 	@echo "🚀 Checking Poetry lock file consistency with 'pyproject.toml': Running poetry lock --check"
 	@poetry check --lock
+	@echo "🚀 Checking for obsolete dependencies: Running deptry"
+	@poetry run deptry .
+
+.PHONY: check-security
+check-security: ## Run package security tools.
+	@echo "🚀 Checking for security issues: Running bandit"
+	@poetry run bandit -c pyproject.toml -r ./source --quiet
 
 .PHONY: check-all
-check-all: check-style check-types check-packages  ## Run all quality tools.
+check-all: check-style check-types check-security check-packages  ## Run all quality tools.
 
 .PHONY: install
 install: ## Install the poetry environment
