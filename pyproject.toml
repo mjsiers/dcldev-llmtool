@@ -78,7 +78,7 @@ testpaths = ["tests"]
 exclude_dirs = ["tests"]
 
 [tool.deptry.per_rule_ignores]
-DEP002 = ["python-dotenv", "polars", "duckdb", "tantivy", "types-toml", "crewai"]
+DEP002 = ["python-dotenv", "polars", "duckdb", "tantivy", "types-toml", "crewai", "numpy"]
 
 [tool.ruff]
 line-length = 100
