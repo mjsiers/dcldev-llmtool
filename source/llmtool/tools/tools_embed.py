@@ -1,19 +1,10 @@
 import logging
-import os
-from typing import Any, Dict, List, Optional
+from typing import Dict, List
 
 import lancedb
-import numpy as np
-import ollama
 import pyarrow as pa
 
-from ..data.database import (
-    database_connect,
-    database_create_fts,
-    database_create_tables,
-    database_drop_tables,
-    embed_text,
-)
+from ..data.database import embed_text
 from ..data.models import DocumentSchema, SectionSchema
 from ..settings import lancedb_assessment_table, lancedb_section_table
 

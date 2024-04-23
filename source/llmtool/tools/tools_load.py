@@ -8,14 +8,14 @@ import fsspec
 import pandas as pd
 from docx import Document
 
-from ..data.models import DocumentSchema, SectionSchema
-from .tools_embed import (
+from ..data.database import (
     database_connect,
     database_create_fts,
     database_create_tables,
     database_drop_tables,
-    database_embed_sections,
 )
+from ..data.models import DocumentSchema
+from .tools_embed import database_embed_sections
 from .tools_parse import docx_parse_client, docx_parse_sections, parse_key_reasons
 
 # configure logging

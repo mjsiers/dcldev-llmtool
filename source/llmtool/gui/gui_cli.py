@@ -1,9 +1,7 @@
 import logging
-from typing import Any, Optional
 
 import click
 import gradio as gr
-import pandas as pd
 
 from ..data.query import search_embeddings, search_keywords
 from ..settings import load_config
@@ -26,7 +24,7 @@ def launch_gui():
                     """
         )
         with gr.Row():
-            client_name = gr.Textbox(placeholder="Client Name", label="Client Name")
+            client_name = gr.Textbox(placeholder="Client Name", label="Client Name")  # noqa: F841
         with gr.Row():
             client_reasons = gr.Textbox(
                 placeholder="Client Reasons", label="Key Reasons for Assessment"
@@ -35,12 +33,12 @@ def launch_gui():
             with gr.Tab("Similarity"):
                 button1 = gr.Button("Search Embeddings")
                 results1 = gr.DataFrame(type="pandas")
-                clear1 = gr.ClearButton(results1)
+                clear1 = gr.ClearButton(results1)  # noqa: F841
 
             with gr.Tab("Keywords"):
                 button2 = gr.Button("Search Keywords")
                 results2 = gr.DataFrame(type="pandas")
-                clear2 = gr.ClearButton(results2)
+                clear2 = gr.ClearButton(results2)  # noqa: F841
 
         button1.click(search_embeddings, inputs=client_reasons, outputs=[results1])
         button2.click(search_keywords, inputs=client_reasons, outputs=[results2])
