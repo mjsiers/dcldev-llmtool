@@ -1,7 +1,6 @@
 #%%
 import ollama
 
-
 #%%
 list_models = ["nomic-embed-text", "all-minilm"]
 prompt = "Why is the sky not green?"

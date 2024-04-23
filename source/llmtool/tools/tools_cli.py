@@ -1,7 +1,16 @@
 import logging
+from typing import Optional
 
 import click
 
+from ..data.query import search_embeddings, search_keywords
+from ..settings import load_config
+from .tools_load import (
+    load_assessment_files,
+    load_template_file,
+    load_template_keywords,
+    save_dataframe,
+)
 
 # configure logging
 logger = logging.getLogger(__name__)
@@ -13,46 +22,110 @@ def tools(ctx):
     logger.info("tools:")
 
 
+# default_folder = "./data/assessments/clients"
+# default_zipfile = "./data/assessments/clients-20240410.zip"
+# default_zipfile = "./data/assessments/drive-download-20240409.zip"
 @tools.command("load", context_settings={"show_default": True})
 @click.pass_context
-@click.option("--dept", type=str, default="mn_stlou_nsfd.json", help="Department JSON file.")
 @click.option(
-    "--events",
+    "--datapath",
     type=str,
-    default="mn_stlou_nsfd_rules.csv",
-    help="Department event rules CSV file.",
+    default="./data/assessments/drive-download-20240409.zip",
+    help="Folder or zip file with assessment files.",
 )
 @click.option(
-    "--members", type=str, default="mn_stlou_nsfd_members.csv", help="Department members CSV file."
+    "--filepath", type=str, default="./data", help="Default file path for template files."
 )
-@click.option("--filepath", type=str, default="./data", help="Default file path.")
-def load(ctx, dept: str, events: str, members: str, filepath: str):
-    logger.info("load: DEPT[%s]", dept)
+@click.option(
+    "--sections", type=str, default="template_sections.json", help="Template sections JSON file."
+)
+@click.option(
+    "--tables", type=str, default="template_tables.json", help="Template tables JSON file."
+)
+@click.option(
+    "--keywords", type=str, default="template_keywords.csv", help="Template keywords CSV file."
+)
+@click.option(
+    "--clients", type=str, default="client_info.csv", help="Clients output info CSV file."
+)
+@click.option(
+    "--reasons",
+    type=str,
+    default="client_reasons_info.csv",
+    help="Client reasons output info CSV file.",
+)
+def load(
+    ctx,
+    datapath: str,
+    filepath: str,
+    sections: str,
+    tables: str,
+    keywords: str,
+    clients: str,
+    reasons: str,
+):
+    logger.info("load: DATAPATH[%s]", datapath)
+    logger.info("load: FILEPATH[%s]", filepath)
+    logger.info("load: SECTIONS[%s]", sections)
+    logger.info("load: TABLES[%s]", tables)
+    logger.info("load: KEYWORDS[%s]", keywords)
+
+    # load the global settings configuration file
+    load_config()
+
+    # load the template sections definitions
+    sections_data = load_template_file(filepath, sections)
+    tables_data = load_template_file(filepath, tables)
+    if sections_data is None or tables_data is None:
+        logger.error("load: Unable to load the required template files.")
+        return
+
+    logger.info("load: SECTIONS[%s]", len(sections_data))
+    logger.info("load: TABLES[%s]", len(tables_data))
+
+    # load the template keywords definitions
+    list_keywords = load_template_keywords(filepath, keywords)
+    if list_keywords is None:
+        logger.error("load: Unable to load the required keywords template file.")
+        return
+
+    # load the assessment files found in the specified location
+    df_clients, df_reasons = load_assessment_files(
+        datapath, list_keywords, sections_data, tables_data
+    )
+    if (clients is not None) and (df_clients is not None):
+        # save the clients into a CSV file
+        save_dataframe(filepath, clients, df_clients)
+    if (reasons is not None) and (df_reasons is not None):
+        # save the client reasons into a CSV file
+        save_dataframe(filepath, reasons, df_reasons, index=True)
 
 
-@tools.command("welcome", context_settings={"show_default": True})
+@tools.command("search", context_settings={"show_default": True})
 @click.pass_context
-@click.option("--dept", type=str, default="mn-stlou-northstar", help="Department identifier.")
-def welcome(ctx, dept: str):
-    # fetch the department record and members
-    logger.info("welcome: DEPT[%s]", dept)
+@click.option("--query", default="self-esteem", type=str, help="Query text.")
+def search(ctx, query: str):
+    logger.info("search: QUERY[%s]", query)
 
+    # load the global settings configuration file
+    load_config()
 
-@tools.command("trigger", context_settings={"show_default": True})
-@click.pass_context
-@click.option("--dept", type=str, default="mn-stlou-northstar", help="Department identifier.")
-def trigger(ctx, dept: str):
-    # fetch the department event rules
-    logger.info("trigger: RULES")
+    # first search using the embeddings
+    filter: Optional[str] = None
+    filter = "client_age < 19.0"
+    df = search_embeddings(query, filter_text=filter)
+    if df is None:
+        logger.info("search: No result found.")
+        return
 
+    logger.info("search: Found [%s] embedding results.", df.shape)
+    print(df.head(10))
 
-list_replies = ["START", "STOP", "NO", "YES", "STATUS"]
+    # now search using the keywords
+    df = search_keywords(query, filter_text=filter)
+    if df is None:
+        logger.info("search: No result found.")
+        return
 
-
-@tools.command("reply", context_settings={"show_default": True})
-@click.pass_context
-@click.option("--text", required=True, type=click.Choice(list_replies, case_sensitive=False))
-@click.option("--mobile", type=str, default="+12183935621", help="Mobile number.")
-def reply(ctx, text: str, mobile: str):
-    # fetch the mobile record
-    logger.info("reply: TEXT[%s] MOBILE[%s]", text, mobile)
+    logger.info("search: Found [%s] keyword results.", df.shape)
+    print(df.head(10))

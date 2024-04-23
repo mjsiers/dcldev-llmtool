@@ -1,9 +1,8 @@
 #%%
-import ollama
 import lancedb
-import pyarrow as pa
+import ollama
 import pandas as pd
-
+import pyarrow as pa
 
 #%%
 test_docs = [

@@ -1,6 +1,7 @@
 #%%
 import json
 import re
+
 from docx import Document
 
 section_defn = [
@@ -128,28 +129,28 @@ section_defn = [
         'text': "What Can Be Done?", 
         'skip': True, 
         'max_length': -1,
-        'text_range': None,        
+        'text_range': None,
     },
     {
         'title': "recommendations", 
         'text': "Programming /Recommendations", 
         'skip': False, 
         'max_length': 90,
-        'text_range': None,        
+        'text_range': None,
     },
     {
         'title': "commitment", 
         'text': "Commitment", 
         'skip': False, 
         'max_length': -1,
-        'text_range': None,        
+        'text_range': None,
     },
     {
         'title': "testing-scores", 
         'text': "Testing and Scores", 
         'skip': True, 
         'max_length': -1,
-        'text_range': None,        
+        'text_range': None,
     },
 ]
 
