@@ -17,6 +17,7 @@ site
 
 # exclude test assessment files
 data/assessments/clients
+data/assessments/private
 data/assessments/*.zip
 data/client_*.csv
 data/client_*.json
