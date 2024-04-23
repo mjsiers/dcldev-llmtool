@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Optional
 
 from lancedb.pydantic import LanceModel, Vector
 
@@ -19,7 +19,7 @@ class DocumentSchema(LanceModel):
     client_dob: Optional[str] = None
     client_grade: Optional[int] = None
     client_age: Optional[float] = None
-    vector: Vector(EMBEDDING_MODEL_LENGTH)
+    vector: Vector(EMBEDDING_MODEL_LENGTH)  # type: ignore[valid-type]
 
 
 class SectionSchema(LanceModel):
@@ -28,4 +28,4 @@ class SectionSchema(LanceModel):
     client_age: Optional[float]
     section: str
     text: str
-    vector: Vector(EMBEDDING_MODEL_LENGTH)
+    vector: Vector(EMBEDDING_MODEL_LENGTH)  # type: ignore[valid-type]

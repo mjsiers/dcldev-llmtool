@@ -74,7 +74,6 @@ def parse_key_reasons(dict_keywords: Dict[str, int], list_reasons: List[str]) ->
         "him",
         "while",
     ]
-    delimiter: str = ""
 
     # loop through all the lines of text in the key reasons section
     # goal is to parse out just the bullet points from this section

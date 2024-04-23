@@ -90,15 +90,19 @@ def load(
         return
 
     # load the assessment files found in the specified location
-    df_clients, df_reasons = load_assessment_files(
-        datapath, list_keywords, sections_data, tables_data
-    )
-    if (clients is not None) and (df_clients is not None):
-        # save the clients into a CSV file
-        save_dataframe(filepath, clients, df_clients)
-    if (reasons is not None) and (df_reasons is not None):
-        # save the client reasons into a CSV file
-        save_dataframe(filepath, reasons, df_reasons, index=True)
+    results = load_assessment_files(datapath, list_keywords, sections_data, tables_data)
+    if results is not None:
+        # unpack the results tuple
+        df_clients = results[0]
+        df_reasons = results[1]
+
+        # check to see if the different dataframes can be persisted
+        if (clients is not None) and (df_clients is not None):
+            # save the clients into a CSV file
+            save_dataframe(filepath, clients, df_clients)
+        if (reasons is not None) and (df_reasons is not None):
+            # save the client reasons into a CSV file
+            save_dataframe(filepath, reasons, df_reasons, index=True)
 
 
 @tools.command("search", context_settings={"show_default": True})

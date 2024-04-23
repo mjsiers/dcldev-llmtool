@@ -1,0 +1,32 @@
+name: Static Code Checks
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  quality:
+    name: Static Code Checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: "Checkout Source Code"
+        uses: actions/checkout@v4
+        with:
+          # ensure the repository tags are available
+          fetch-tags: True
+
+      - name: Setup Python Environment
+        uses: ./.github/actions/setup-poetry-env
+
+      - name: Check Packages
+        run: make check-packages
+
+      - name: Check Security
+        run: make check-security
+
+      - name: Check Code
+        run: make check-code
