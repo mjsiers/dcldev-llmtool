@@ -1,0 +1,21 @@
+name: Static Code Checks
+on: [push]
+
+jobs:
+  name: Static Code Checks
+  runs-on: ubuntu-latest
+  timeout-minutes: 10
+  steps:
+    - name: "Checkout Source Code"
+      uses: actions/checkout@v3
+      with:
+        # this is necessary so that we have the tags
+        fetch-depth:0
+
+    - name: Set up the environment
+      uses: ./.github/actions/setup-poetry-env
+
+    - name: Check Poetry lock file consistency
+      run: poetry lock --check
+
+    - run: poetry --version
