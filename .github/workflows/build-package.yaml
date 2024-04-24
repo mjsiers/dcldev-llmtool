@@ -1,0 +1,37 @@
+name: Build Package
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  build:
+    name: Build Package
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: "Checkout Source Code"
+        uses: actions/checkout@v4
+        with:
+          # ensure the repository tags are available
+          fetch-tags: True
+
+      - name: "Setup Python Environment"
+        uses: ./.github/actions/setup-poetry-env
+
+      - name: "Compute Package Version"
+        uses: mtkennerly/dunamai-action@v1.3.0
+        with:
+          env-var: PACKAGE_VERSION
+          args: --style semver
+
+      - name: "Update Package Version"
+        run: |
+          echo "PACKAGE VERSION [${PACKAGE_VERSION}]"
+          PLACEHOLDER='__version__ = "0.0.0"'
+          VERSION_FILE1='source/llmtool/__metadata__.py'
+          grep "$PLACEHOLDER" "$VERSION_FILE1"
+          sed -i "s/$PLACEHOLDER/__version__ = \"${PACKAGE_VERSION}\"/g" "$VERSION_FILE1"
