@@ -35,4 +35,7 @@ jobs:
           VERSION_FILE1='source/llmtool/__metadata__.py'
           grep "$PLACEHOLDER" "$VERSION_FILE1"
           sed -i "s/$PLACEHOLDER/__version__ = \"${PACKAGE_VERSION}\"/g" "$VERSION_FILE1"
+          echo "---AAA"
+          tail -n3 file.txt | grep -v "^.$" | tail -n 1
+          echo "---BBB"
           tail "$VERSION_FILE1"
