@@ -1,6 +1,5 @@
 #%%
 import json
-import re
 
 from docx import Document
 
@@ -173,11 +172,11 @@ def is_section_text(text: str) -> int:
 
 
 #%%
-client_filename = "../data/assessments/clients/2021-richner-will.docx"
-client_filename = "../data/assessments/clients/2022-kinkel-harrison.docx"
-client_filename = "../data/assessments/clients/2023-manion-coleton.docx"
-client_filename = "../data/assessments/clients/2024-plese-bentley.docx"
-client_filename = "../data/assessments/clients/2024-hilton-brooklyn.docx"
+client_filename = "../data/assessments/clients/2021-0001.docx"
+client_filename = "../data/assessments/clients/2022-0001.docx"
+client_filename = "../data/assessments/clients/2023-0001.docx"
+client_filename = "../data/assessments/clients/2024-0001.docx"
+client_filename = "../data/assessments/clients/2024-0002.docx"
 document = Document(client_filename)
 
 doc_sections = {}

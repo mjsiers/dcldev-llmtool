@@ -1,0 +1,11 @@
+FROM mistral:7b
+
+# Set parameters
+PARAMETER num_ctx 4096
+PARAMETER temperature 0.8
+PARAMETER stop Result
+
+# Set a custom system message to specify the behavior
+# of the chat assistant - leaving it blank for now
+SYSTEM """"""
+

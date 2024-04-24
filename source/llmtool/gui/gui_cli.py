@@ -18,8 +18,8 @@ def launch_gui():
     with gr.Blocks() as demo:
         gr.Markdown(
             """
-                    # DCL Assessment Tool
-                    This tool provides the ability to search the data extracted from previous DCL Assessment reports. 
+                    # Client Assessment Report Tool
+                    This tool provides the ability to search the data extracted from previous assessment reports. 
                     The data can be searched using either similarity or keywords.
                     """
         )

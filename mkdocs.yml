@@ -20,3 +20,20 @@ theme:
         name: Switch to light mode
   icon:
     repo: fontawesome/brands/github
+
+nav:
+  - Home: index.md
+  - Design:
+    - design/index.md
+  - Development:
+    - development/index.md
+    - Environment Variables: development/environment.md        
+    - Data Files: development/datafiles.md
+    - Documentation: development/documents.md
+  - Workflow:
+    - workflow/index.md
+    - Commands: workflow/cli.md
+
+plugins:
+  - search
+  - section-index

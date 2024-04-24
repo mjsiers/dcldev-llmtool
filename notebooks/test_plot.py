@@ -14,10 +14,10 @@ print(df_reasons.head())
 #%%
 plt.figure(figsize=(10, 6))
 sns.barplot(data=df_reasons, x='percent', y='keyword')
-plt.title('DCL Assessment Key Reasons')
+plt.title('Assessment Key Reasons')
 plt.xlabel('Percentage')
 plt.ylabel('Parent Keyword')
-plt.savefig('dcl-parent-keywords.png')
+plt.savefig('parent-keywords.png')
 plt.show()
 
 
@@ -42,18 +42,18 @@ print(df_clients.shape)
 #%%
 plt.figure(figsize=(10, 6))
 sns.histplot(data=df_clients, x='client_age', hue='assessment_year', stat="percent", multiple="stack")
-plt.title('DCL Client Ages [2021-2024]')
+plt.title('Client Ages [2021-2024]')
 plt.ylabel('Percentage')
-plt.savefig('dcl-client-ages.png')
+plt.savefig('client-ages.png')
 plt.show()
 
 
 #%%
 plt.figure(figsize=(10, 6))
 sns.histplot(data=df_clients, x='client_grade', hue='assessment_year', stat="percent", multiple="stack", discrete=True)
-plt.title('DCL Client Grades [2021-2024]')
+plt.title('Client Grades [2021-2024]')
 plt.ylabel('Percentage')
-plt.savefig('dcl-client-grades.png')
+plt.savefig('client-grades.png')
 plt.show()
 
 
