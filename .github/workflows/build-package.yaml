@@ -36,6 +36,6 @@ jobs:
           grep "$PLACEHOLDER" "$VERSION_FILE1"
           sed -i "s/$PLACEHOLDER/__version__ = \"${PACKAGE_VERSION}\"/g" "$VERSION_FILE1"
           echo "---AAA"
-          tail -n3 file.txt | grep -v "^.$" | tail -n 1
+          tail -n3 "$VERSION_FILE1" | grep -v "^.$" | tail -n 1
           echo "---BBB"
           tail "$VERSION_FILE1"
