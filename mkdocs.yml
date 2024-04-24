@@ -23,16 +23,16 @@ theme:
 
 nav:
   - Home: index.md
-  - Build:
-    - build/index.md
-    - Data Files: build/datafiles.md
-    - Documents: build/documents.md
   - Design:
     - design/index.md
-    - Database: design/database.md
-  - Commands:
-    - commands/index.md
-    - CLI: commands/cli.md
+  - Development:
+    - development/index.md
+    - Environment Variables: development/environment.md        
+    - Data Files: development/datafiles.md
+    - Documentation: development/documents.md
+  - Workflow:
+    - workflow/index.md
+    - Commands: workflow/cli.md
 
 plugins:
   - search
