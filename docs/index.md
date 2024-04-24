@@ -1,4 +1,4 @@
-# DCL Assessment Tool
+# Client Assessment Report Tool
 
 The purpose of this project is to evaluate how well open source large language models (LLM)
 would work in assisting the generation of text for a client assessment report.  The generated 
