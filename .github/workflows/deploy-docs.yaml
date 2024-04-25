@@ -1,0 +1,26 @@
+name: Deploy Documentation
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: write
+
+jobs:
+  deploy-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout Source Code"
+        uses: actions/checkout@v4
+        with:
+          # ensure the repository tags are available
+          fetch-tags: True
+
+      - name: "Setup Python Environment"
+        uses: ./.github/actions/setup-poetry-env
+
+      - name: Deploy documentation
+        run: make docs-deploy
