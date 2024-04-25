@@ -22,12 +22,11 @@ output.
 
 ### Technology Stack
 - Linux/Ubuntu/PopOS
-- Makefile
-- Poetry
-- Python
+- Python (v3.10) using Poetry Package Manager
 - LanceDB (Vector Database)
 - Ollama (Local LLMs)
   - Embedding Model(s)
   - Text Generation Model(s)
 - CrewAI (AI Agents)
 - Gradio (Web User Interface)
+- MkDocs (Project Documentation)
