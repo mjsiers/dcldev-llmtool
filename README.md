@@ -30,3 +30,7 @@ output.
 - CrewAI (AI Agents)
 - Gradio (Web User Interface)
 - MkDocs (Project Documentation)
+
+### Project Documentation
+The latest version of the project documentation is available using 
+[Github Pages](https://mjsiers.github.io/dcldev-llmtool/).
