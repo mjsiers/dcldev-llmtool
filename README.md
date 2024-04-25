@@ -31,9 +31,3 @@ output.
   - Text Generation Model(s)
 - CrewAI (AI Agents)
 - Gradio (Web User Interface)
-
-### CLI
-TBD.
-
-### GUI
-TBD.
