@@ -34,7 +34,7 @@ def tools(ctx):
     help="Folder or zip file with assessment files.",
 )
 @click.option(
-    "--filepath", type=str, default="./data", help="Default file path for template files."
+    "--filepath", type=str, default="./config", help="Default file path for template files."
 )
 @click.option(
     "--sections", type=str, default="template_sections.json", help="Template sections JSON file."
