@@ -19,8 +19,8 @@ site
 data/assessments/clients
 data/assessments/private
 data/assessments/*.zip
-data/client_*.csv
-data/client_*.json
+client_*.csv
+client_*.json
 
 # exclude local vector store files
 data/vectors

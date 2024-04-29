@@ -99,10 +99,10 @@ def load(
         # check to see if the different dataframes can be persisted
         if (clients is not None) and (df_clients is not None):
             # save the clients into a CSV file
-            save_dataframe(filepath, clients, df_clients)
+            save_dataframe("./", clients, df_clients)
         if (reasons is not None) and (df_reasons is not None):
             # save the client reasons into a CSV file
-            save_dataframe(filepath, reasons, df_reasons, index=True)
+            save_dataframe("./", reasons, df_reasons, index=True)
 
 
 @tools.command("search", context_settings={"show_default": True})
