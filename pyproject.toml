@@ -34,7 +34,9 @@ types-toml = "~0.10.8"
 matplotlib = "~3.8.4"
 seaborn = "~0.13.2"
 gradio = "4.26.0"
-crewai = "0.28.8"
+crewai = "~0.28.8"
+#crewai-clean = "~0.22.5"
+#crewai-tools = "~0.1.7"
 
 [tool.poetry.group.dev.dependencies]
 isort = "~5.13.2"
