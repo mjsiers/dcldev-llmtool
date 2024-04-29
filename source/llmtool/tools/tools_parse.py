@@ -146,7 +146,7 @@ def parse_key_reasons(dict_keywords: Dict[str, int], list_reasons: List[str]) ->
 
 
 def docx_parse_client(
-    file_name: str, document: Document, reasons: str, keywords: str
+    embed_model: str, file_name: str, document: Document, reasons: str, keywords: str
 ) -> Optional[DocumentSchema]:
     # ensure the document has at least one table
     if len(document.tables) == 0:
@@ -164,7 +164,7 @@ def docx_parse_client(
         return None
 
     # initialize the document schema values
-    doc_vector = embed_text(reasons)
+    doc_vector = embed_text(embed_model, reasons)
     doc_uuid = str(uuid.uuid4())
     doc_data = DocumentSchema(
         assessment_uuid=doc_uuid,

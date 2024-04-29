@@ -1,27 +1,77 @@
+import dataclasses
 import logging
 from typing import Dict, Optional
 
+import dacite
 import fsspec
 import toml
 
 # configure logging
 logger = logging.getLogger(__name__)
 
-# define and set the default log level setting
-default_loglevel = logging.INFO
 
-# define and set the default ollama model names
-ollama_model_embed = "nomic-embed-text"
-ollama_model_chat = "mistral:7b"
+@dataclasses.dataclass
+class ModelsConfig:
+    embedding: str
+    chat: str
 
-# define and set the default database table names
-lancedb_database_path = "./data/vectors/lancedb"
-lancedb_database_name = "dcl-llmtool"
-lancedb_assessment_table = "dcl-assessment"
-lancedb_section_table = "dcl-section"
+    @classmethod
+    def get_defaults(cls):
+        return ModelsConfig("", "")
 
 
-def load_config() -> None:
+@dataclasses.dataclass
+class LanceDbConfig:
+    database_path: str
+    database_name: str
+    assessment_table: str
+    section_table: str
+
+    @classmethod
+    def get_defaults(cls):
+        return LanceDbConfig("", "", "", "")
+
+
+@dataclasses.dataclass
+class TemplateConfig:
+    template_path: str
+    template_keywords: str
+    template_sections: str
+    template_tables: str
+
+    @classmethod
+    def get_defaults(cls):
+        return TemplateConfig("", "", "", "")
+
+
+@dataclasses.dataclass
+class CrewConfig:
+    crew_path: str
+    crew_agents: str
+
+    @classmethod
+    def get_defaults(cls):
+        return CrewConfig("", "")
+
+
+@dataclasses.dataclass
+class AppConfig:
+    models: ModelsConfig
+    lancedb: LanceDbConfig
+    template: TemplateConfig
+    crew: CrewConfig
+
+    @classmethod
+    def get_defaults(cls):
+        return AppConfig(
+            models=ModelsConfig.get_defaults(),
+            lancedb=LanceDbConfig.get_defaults(),
+            template=TemplateConfig.get_defaults(),
+            crew=CrewConfig.get_defaults(),
+        )
+
+
+def load_config() -> Optional[AppConfig]:
     config_filepath: str = "./config.toml"
     config: Optional[Dict] = None
 
@@ -43,27 +93,30 @@ def load_config() -> None:
         logger.info("load_config: Using default configuration values.")
         return
 
-    # load the ollama model configuration values
+    # load the configuration values
     logger.info("load_config: Using [%s] configuration values.", config_filepath)
-    if "models" in config:
-        if "embedding" in config["models"]:
-            ollama_model_embed = config["models"]["embedding"]
-            logger.debug("load_config: %s: %s", "ollama_model_embed", ollama_model_embed)
-        if "chat" in config["models"]:
-            ollama_model_chat = config["models"]["chat"]
-            logger.debug("load_config: %s: %s", "ollama_model_chat", ollama_model_chat)
+    app_config = AppConfig.get_defaults()  # type: ignore
+    for k, v in config.items():
+        key = k.lower()
+        if key == "models":
+            app_config.models = dacite.from_dict(data_class=ModelsConfig, data=v)
+        elif key == "lancedb":
+            app_config.lancedb = dacite.from_dict(data_class=LanceDbConfig, data=v)
+        elif key == "template":
+            app_config.template = dacite.from_dict(data_class=TemplateConfig, data=v)
+        elif key == "crew":
+            app_config.crew = dacite.from_dict(data_class=CrewConfig, data=v)
+        else:
+            logger.warning("load_config: Unknown configuration value [%s].", k)
 
-    # load the lancedb vector database configuration values
-    if "lancedb" in config:
-        if "database_path" in config["lancedb"]:
-            lancedb_database_path = config["lancedb"]["database_path"]
-            logger.info("load_config: %s: %s", "lancedb_database_path", lancedb_database_path)
-        if "database_name" in config["lancedb"]:
-            lancedb_database_name = config["lancedb"]["database_name"]
-            logger.info("load_config: %s: %s", "lancedb_database_name", lancedb_database_name)
-        if "assessment_table" in config["lancedb"]:
-            lancedb_assessment_table = config["lancedb"]["assessment_table"]
-            logger.info("load_config: %s: %s", "lancedb_assessment_table", lancedb_assessment_table)
-        if "section_table" in config["lancedb"]:
-            lancedb_section_table = config["lancedb"]["section_table"]
-            logger.info("load_config: %s: %s", "lancedb_section_table", lancedb_section_table)
+    # ensure we have a valid configuration
+    if (
+        app_config.models is None
+        or app_config.lancedb is None
+        or app_config.template is None
+        or app_config.crew is None
+    ):
+        logger.error("load_config: Missing required configuration values.")
+        return None
+
+    return app_config

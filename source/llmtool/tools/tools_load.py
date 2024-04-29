@@ -15,6 +15,7 @@ from ..data.database import (
     database_drop_tables,
 )
 from ..data.models import DocumentSchema
+from ..settings import AppConfig
 from .tools_embed import database_embed_sections
 from .tools_parse import docx_parse_client, docx_parse_sections, parse_key_reasons
 
@@ -107,6 +108,7 @@ def save_dataframe(filepath: str, filename: str, df_data: pd.DataFrame, index: b
 
 
 def load_document(
+    embed_model: str,
     file_basename: str,
     file_obj: Any,
     dict_keywords: Dict[str, int],
@@ -135,7 +137,7 @@ def load_document(
         return None
 
     # try parsing out the client info
-    doc_client = docx_parse_client(file_basename, document, reasons, keywords)
+    doc_client = docx_parse_client(embed_model, file_basename, document, reasons, keywords)
     if doc_client is None:
         logger.warning("load_document: [%s] was unable to parse client info.", file_basename)
         return None
@@ -155,7 +157,11 @@ def load_document(
 
 
 def load_assessment_files(
-    filepath: str, list_keywords: List[str], sections_data: Dict, tables_data: Dict
+    config: AppConfig,
+    filepath: str,
+    list_keywords: List[str],
+    sections_data: Dict,
+    tables_data: Dict,
 ) -> Optional[Tuple[pd.DataFrame, pd.DataFrame]]:
     # ensure the specified file exists
     fs = fsspec.filesystem("file")
@@ -175,9 +181,9 @@ def load_assessment_files(
         return None
 
     # initialize the database and drop all existing tables
-    db = database_connect()
-    database_drop_tables(db)
-    database_create_tables(db)
+    db = database_connect(config.lancedb)
+    database_drop_tables(config.lancedb, db)
+    database_create_tables(config.lancedb, db)
     total_files = 0
     valid_files = 0
 
@@ -194,14 +200,23 @@ def load_assessment_files(
             # load the current document
             file_basename = os.path.basename(item)
             total_files += 1
-            results = load_document(file_basename, item, dict_keywords, sections_data, tables_data)
+            results = load_document(
+                config.models.embedding,
+                file_basename,
+                item,
+                dict_keywords,
+                sections_data,
+                tables_data,
+            )
             if results is None:
                 continue
 
             # create all the required embeddings from this document
             doc_client = results[0]
             doc_sections = results[1]
-            database_embed_sections(db, doc_client, doc_sections)
+            database_embed_sections(
+                config.models.embedding, config.lancedb, db, doc_client, doc_sections
+            )
             valid_files += 1
             list_clients.append(doc_client.model_dump())
 
@@ -217,7 +232,12 @@ def load_assessment_files(
                         file_basename = os.path.basename(f)
                         total_files += 1
                         results = load_document(
-                            file_basename, fp, dict_keywords, sections_data, tables_data
+                            config.models.embedding,
+                            file_basename,
+                            fp,
+                            dict_keywords,
+                            sections_data,
+                            tables_data,
                         )
                         if results is None:
                             continue
@@ -225,7 +245,9 @@ def load_assessment_files(
                         # create all the required embeddings from this document
                         doc_client = results[0]
                         doc_sections = results[1]
-                        database_embed_sections(db, doc_client, doc_sections)
+                        database_embed_sections(
+                            config.models.embedding, config.lancedb, db, doc_client, doc_sections
+                        )
                         valid_files += 1
                         list_clients.append(doc_client.model_dump())
 
@@ -236,7 +258,7 @@ def load_assessment_files(
         return None
 
     # create the full text search index on the keywords column
-    database_create_fts(db)
+    database_create_fts(config.lancedb, db)
 
     # determine the total number of times the keywords were found
     total_words = 0

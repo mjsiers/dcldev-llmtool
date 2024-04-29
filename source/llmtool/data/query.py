@@ -3,7 +3,7 @@ from typing import Optional
 
 import pandas as pd
 
-from ..settings import lancedb_assessment_table
+from ..settings import AppConfig
 from .database import database_connect, embed_text
 
 # configure logging
@@ -11,16 +11,16 @@ logger = logging.getLogger(__name__)
 
 
 def search_embeddings(
-    query_text: str, filter_text: Optional[str] = None, limit: int = 10
+    config: AppConfig, query_text: str, filter_text: Optional[str] = None, limit: int = 10
 ) -> Optional[pd.DataFrame]:
     # embed the query text
-    query_vector = embed_text(query_text)
+    query_vector = embed_text(config.models.embedding, query_text)
     if query_vector is None:
         return None
 
     # connect to the database and get the specified table
-    db = database_connect()
-    tbl = db.open_table(lancedb_assessment_table)
+    db = database_connect(config.lancedb)
+    tbl = db.open_table(config.lancedb.assessment_table)
     list_cols = ["assessment_uuid", "assessment_date", "client_name", "client_grade", "client_age"]
 
     # build and execute the query
@@ -32,11 +32,11 @@ def search_embeddings(
 
 
 def search_keywords(
-    query_text: str, filter_text: Optional[str] = None, limit: int = 10
+    config: AppConfig, query_text: str, filter_text: Optional[str] = None, limit: int = 10
 ) -> Optional[pd.DataFrame]:
     # connect to the database and get the specified table
-    db = database_connect()
-    tbl = db.open_table(lancedb_assessment_table)
+    db = database_connect(config.lancedb)
+    tbl = db.open_table(config.lancedb.assessment_table)
     list_cols = ["assessment_uuid", "assessment_date", "client_name", "client_grade", "client_age"]
 
     # build and execute the query
