@@ -3,15 +3,19 @@ from textwrap import dedent
 
 from crewai import Agent, Task
 
+from .crew_state import ReportState
+
 # configure logging
 logger = logging.getLogger(__name__)
 
 
 class ReportTasks:
-    # def __init__(self):
-    #   pass
+    def __init__(self, state: ReportState):
+        self.state = state
 
-    def reasons_task(self, agent: Agent, context: str) -> Task:
+    def reasons_task(self, agent: Agent) -> Task:
+        # list_keywords = '\n'.join(self.state)
+        keywords_text = ""
         task = Task(
             description=dedent(
                 f"""\
@@ -25,7 +29,7 @@ class ReportTasks:
 
 				EMAILS
 				-------
-				{context}
+				{keywords_text}
 
 				Your final answer MUST be a the relevant thread_ids and the sender, use bullet points.
 				"""
