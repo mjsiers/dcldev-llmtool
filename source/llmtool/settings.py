@@ -13,11 +13,14 @@ logger = logging.getLogger(__name__)
 @dataclasses.dataclass
 class ModelsConfig:
     embedding: str
-    chat: str
+    instruct: str
+    text: str
 
     @classmethod
     def get_defaults(cls):
-        return ModelsConfig("", "")
+        return ModelsConfig(
+            embedding="nomic-embed-text", instruct="llama3:8b-instruct", text="llama3:8b-text"
+        )
 
 
 @dataclasses.dataclass
@@ -29,7 +32,12 @@ class LanceDbConfig:
 
     @classmethod
     def get_defaults(cls):
-        return LanceDbConfig("", "", "", "")
+        return LanceDbConfig(
+            database_path="./data/vectors/lancedb",
+            database_name="dcl-llmtool",
+            assessment_table="dcl-assessment",
+            section_table="dcl-section",
+        )
 
 
 @dataclasses.dataclass
@@ -41,7 +49,12 @@ class TemplateConfig:
 
     @classmethod
     def get_defaults(cls):
-        return TemplateConfig("", "", "", "")
+        return TemplateConfig(
+            template_path="./config",
+            template_keywords="template_keywords.csv",
+            template_sections="template_sections.json",
+            template_tables="template_tables.json",
+        )
 
 
 @dataclasses.dataclass
@@ -51,7 +64,7 @@ class CrewConfig:
 
     @classmethod
     def get_defaults(cls):
-        return CrewConfig("", "")
+        return CrewConfig(crew_path="./config", crew_agents="crew_agents.json")
 
 
 @dataclasses.dataclass

@@ -1,6 +1,7 @@
 [models]
 embedding = "nomic-embed-text"
-chat = "mistral:7b"
+instruct = "llama3:8b-instruct"
+text = "llama3:8b-text"
 
 [lancedb]
 database_path = "./data/vectors/lancedb"
