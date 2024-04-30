@@ -1,7 +1,7 @@
 [models]
 embedding = "nomic-embed-text"
-instruct = "llama3:8b-instruct"
-text = "llama3:8b-text"
+instruct = "crewai-llama3"
+text = "crewai-llama3"
 
 [lancedb]
 database_path = "./data/vectors/lancedb"

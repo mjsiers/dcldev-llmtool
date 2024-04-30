@@ -19,7 +19,7 @@ class ModelsConfig:
     @classmethod
     def get_defaults(cls):
         return ModelsConfig(
-            embedding="nomic-embed-text", instruct="llama3:8b-instruct", text="llama3:8b-text"
+            embedding="nomic-embed-text", instruct="crewai-llama3", text="crewai-llama3"
         )
 
 
