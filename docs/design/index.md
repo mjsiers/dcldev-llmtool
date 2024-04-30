@@ -47,3 +47,18 @@ vector into the table but this is not currently being used.
 
 ### Multi-Agent Text Generation
 
+#### Agents
+- Reasons Writer
+- Section Writer
+- Editor
+
+#### Tools
+- Query LanceDB for similar clients
+- Query LanceDB for specific section text and filtering by specified client list
+
+#### Tasks
+- Get similar clients to the current client
+- Generate key reason text for client
+- Generate section text for client
+- Correct any errors or mistakes in generated text
+- 

@@ -1,6 +1,6 @@
 from typing import Dict, List, TypedDict
 
-from ...settings import AppConfig
+from ..settings import AppConfig
 
 # https://github.com/joaomdmoura/crewAI-examples/tree/main/landing_page_generator
 # https://github.com/joaomdmoura/crewAI-examples/blob/main/CrewAI-LangGraph/src/state.py

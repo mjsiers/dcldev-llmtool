@@ -3,8 +3,8 @@ from typing import List, Optional
 
 from langchain.tools import tool
 
-from ...data.query import search_embeddings, search_sections
-from ...settings import AppConfig
+from ..data.query import search_embeddings, search_sections
+from ..settings import AppConfig
 
 # configure logging
 logger = logging.getLogger(__name__)

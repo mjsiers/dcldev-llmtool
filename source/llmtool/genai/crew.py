@@ -3,7 +3,7 @@ from typing import List
 
 from crewai import Crew
 
-from ...settings import AppConfig
+from ..settings import AppConfig
 from .crew_agents import ReportAgents
 from .crew_state import ReportState
 from .crew_tasks import ReportTasks
@@ -20,7 +20,7 @@ class ReportCrew:
         self, config: AppConfig, keywords: List[str], observations: List[str], sections: List[str]
     ):
         # create the report agents
-        agents = ReportAgents()
+        agents = ReportAgents(config)
         self.reasons_agent = agents.reasons_agent()
         self.section_agent = agents.section_agent()
 

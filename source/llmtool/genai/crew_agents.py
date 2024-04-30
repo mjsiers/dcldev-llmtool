@@ -3,13 +3,15 @@ from textwrap import dedent
 
 from crewai import Agent
 
+from ..settings import AppConfig
+
 # configure logging
 logger = logging.getLogger(__name__)
 
 
 class ReportAgents:
-    # def __init__(self):
-    #   pass
+    def __init__(self, config: AppConfig):
+        self.config = config
 
     def reasons_agent(self) -> Agent:
         agent = Agent(
