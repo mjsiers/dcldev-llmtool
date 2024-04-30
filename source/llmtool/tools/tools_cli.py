@@ -3,7 +3,7 @@ from typing import Optional
 
 import click
 
-from ..data.query import search_embeddings, search_keywords
+from ..data.query import search_embeddings, search_keywords, search_sections
 from ..settings import load_config
 from .tools_load import (
     load_assessment_files,
@@ -113,6 +113,8 @@ def search(ctx, query: str):
 
     logger.info("search: Found [%s] embedding results.", df.shape)
     print(df.head(10))
+    list_uuids = df["assessment_uuid"].tolist()
+    print(list_uuids[0:4])
 
     # now search using the keywords
     df = search_keywords(config, query, filter_text=filter)
@@ -122,3 +124,9 @@ def search(ctx, query: str):
 
     logger.info("search: Found [%s] keyword results.", df.shape)
     print(df.head(10))
+
+    # now search for the sections
+    list_sections = ["auditory-processing", "dyslexia", "dysgraphia"]
+    for item in list_sections:
+        df = search_sections(config, item, list_uuids[0:4])
+        print(df.head(10))
