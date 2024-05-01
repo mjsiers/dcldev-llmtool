@@ -1,4 +1,5 @@
-from typing import Dict, List, TypedDict
+import dataclasses
+from typing import Dict, List
 
 from ..settings import AppConfig
 
@@ -6,11 +7,23 @@ from ..settings import AppConfig
 # https://github.com/joaomdmoura/crewAI-examples/blob/main/CrewAI-LangGraph/src/state.py
 
 
-class ReportState(TypedDict):
+# define list of default section names
+default_section_names = ["key-reasons", "summary-impact", "auditory-processing"]
+
+
+@dataclasses.dataclass
+class ReportClient:
+    name: str
+    keywords: List[str]
+    facts: List[str]
+    observations: List[str]
+    sections: List[str] = default_section_names
+
+
+@dataclasses.dataclass
+class ReportState:
     config: AppConfig
-    client_keywords: List[str]
-    client_observations: List[str]
-    client_sections: List[str]
+    client: ReportClient
     client_uuids: List[str]
     section_context: Dict[str, List[str]]
     section_results: Dict[str, str]

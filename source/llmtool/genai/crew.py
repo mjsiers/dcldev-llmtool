@@ -1,24 +1,18 @@
 import logging
-from typing import List
 
 from crewai import Crew
 
 from ..settings import AppConfig
 from .crew_agents import ReportAgents
-from .crew_state import ReportState
+from .crew_state import ReportClient, ReportState
 from .crew_tasks import ReportTasks
 
 # configure logging
 logger = logging.getLogger(__name__)
 
-# define list of default section names
-default_section_names = ["key-reasons", "summary-impact", "auditory-processing"]
-
 
 class ReportCrew:
-    def __init__(
-        self, config: AppConfig, keywords: List[str], observations: List[str], sections: List[str]
-    ):
+    def __init__(self, config: AppConfig, client: ReportClient):
         # create the report agents
         agents = ReportAgents(config)
         self.reasons_agent = agents.reasons_agent()
@@ -27,9 +21,7 @@ class ReportCrew:
         # initialize the report state objects
         self.state: ReportState = ReportState(
             config=config,
-            client_keywords=keywords,
-            client_observations=observations,
-            client_sections=sections,
+            client=client,
             client_uuids=[],
             section_context={},
             section_results={},

@@ -11,11 +11,10 @@ logger = logging.getLogger(__name__)
 
 class ReportTasks:
     def __init__(self, state: ReportState):
-        self.state = state
+        self.state: ReportState = state
 
     def reasons_task(self, agent: Agent) -> Task:
-        # list_keywords = '\n'.join(self.state)
-        keywords_text = ""
+        keywords_text = "\n".join(self.state.client.keywords)
         task = Task(
             description=dedent(
                 f"""\
