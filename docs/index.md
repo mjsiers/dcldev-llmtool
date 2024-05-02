@@ -8,7 +8,7 @@ improvements.
 This project will be configured to only use locally running LLMs to ensure the confidential client 
 data is not exposed to other vendors.
 
-## Project layout
+## Project Layout
 
     .github/       # Project Github actions and workflows.
     data/          # Project data files used for parsing reports.
@@ -25,3 +25,7 @@ data is not exposed to other vendors.
     poetry.lock    # Poetry python dependencies files.
     poetry.toml    # Poetry configuration file.
     pyproject.toml # Python project file.
+
+## Project Source Code
+
+The source code for this project is available at [Github](https://github.com/mjsiers/dcldev-llmtool).
