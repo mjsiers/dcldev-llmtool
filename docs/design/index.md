@@ -23,7 +23,7 @@ similar keywords.  The text from each of these client report sections will then 
 as contextual input for the generation of text for the new client.
 
 The database table schemas are defined using PyDantic model classes which are defined
-in the followin source code file.
+in the following source code file.
 
     source/llmtool/data/models.py
 
