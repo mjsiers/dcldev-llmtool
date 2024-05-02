@@ -1,9 +1,20 @@
 [models]
 embedding = "nomic-embed-text"
-chat = "mistral:7b"
+instruct = "crewai-llama3"
+text = "crewai-llama3"
 
 [lancedb]
 database_path = "./data/vectors/lancedb"
 database_name = "dcl-llmtool"
 assessment_table = "dcl-assessment"
 section_table = "dcl-section"
+
+[template]
+template_path = "./config"
+template_keywords = "template_keywords.csv"
+template_sections = "template_sections.json"
+template_tables = "template_tables.json"
+
+[crew]
+crew_path = "./config"
+crew_agents = "crew_agents.json"

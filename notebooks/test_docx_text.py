@@ -158,7 +158,7 @@ section_text = [item["text"] for item in section_defn]
 print(len(section_text))
 print(section_text)
 
-json_filename = "../data/template_sections.json"
+json_filename = "../config/template_sections.json"
 with open(json_filename, 'w', encoding='utf-8') as f:
     json.dump(section_defn, f, ensure_ascii=True, indent=2)
 

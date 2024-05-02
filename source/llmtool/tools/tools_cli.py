@@ -3,7 +3,7 @@ from typing import Optional
 
 import click
 
-from ..data.query import search_embeddings, search_keywords
+from ..data.query import search_embeddings, search_keywords, search_sections
 from ..settings import load_config
 from .tools_load import (
     load_assessment_files,
@@ -34,18 +34,6 @@ def tools(ctx):
     help="Folder or zip file with assessment files.",
 )
 @click.option(
-    "--filepath", type=str, default="./data", help="Default file path for template files."
-)
-@click.option(
-    "--sections", type=str, default="template_sections.json", help="Template sections JSON file."
-)
-@click.option(
-    "--tables", type=str, default="template_tables.json", help="Template tables JSON file."
-)
-@click.option(
-    "--keywords", type=str, default="template_keywords.csv", help="Template keywords CSV file."
-)
-@click.option(
     "--clients", type=str, default="client_info.csv", help="Clients output info CSV file."
 )
 @click.option(
@@ -57,25 +45,20 @@ def tools(ctx):
 def load(
     ctx,
     datapath: str,
-    filepath: str,
-    sections: str,
-    tables: str,
-    keywords: str,
     clients: str,
     reasons: str,
 ):
-    logger.info("load: DATAPATH[%s]", datapath)
-    logger.info("load: FILEPATH[%s]", filepath)
-    logger.info("load: SECTIONS[%s]", sections)
-    logger.info("load: TABLES[%s]", tables)
-    logger.info("load: KEYWORDS[%s]", keywords)
-
     # load the global settings configuration file
-    load_config()
+    config = load_config()
+    if config is None:
+        logger.error("load: Unable to load the configuration file.")
+        return
 
     # load the template sections definitions
-    sections_data = load_template_file(filepath, sections)
-    tables_data = load_template_file(filepath, tables)
+    sections_data = load_template_file(
+        config.template.template_path, config.template.template_sections
+    )
+    tables_data = load_template_file(config.template.template_path, config.template.template_tables)
     if sections_data is None or tables_data is None:
         logger.error("load: Unable to load the required template files.")
         return
@@ -84,13 +67,16 @@ def load(
     logger.info("load: TABLES[%s]", len(tables_data))
 
     # load the template keywords definitions
-    list_keywords = load_template_keywords(filepath, keywords)
+    list_keywords = load_template_keywords(
+        config.template.template_path, config.template.template_keywords
+    )
     if list_keywords is None:
         logger.error("load: Unable to load the required keywords template file.")
         return
 
     # load the assessment files found in the specified location
-    results = load_assessment_files(datapath, list_keywords, sections_data, tables_data)
+    logger.info("load: DATAPATH[%s]", datapath)
+    results = load_assessment_files(config, datapath, list_keywords, sections_data, tables_data)
     if results is not None:
         # unpack the results tuple
         df_clients = results[0]
@@ -99,10 +85,10 @@ def load(
         # check to see if the different dataframes can be persisted
         if (clients is not None) and (df_clients is not None):
             # save the clients into a CSV file
-            save_dataframe(filepath, clients, df_clients)
+            save_dataframe("./", clients, df_clients)
         if (reasons is not None) and (df_reasons is not None):
             # save the client reasons into a CSV file
-            save_dataframe(filepath, reasons, df_reasons, index=True)
+            save_dataframe("./", reasons, df_reasons, index=True)
 
 
 @tools.command("search", context_settings={"show_default": True})
@@ -112,24 +98,35 @@ def search(ctx, query: str):
     logger.info("search: QUERY[%s]", query)
 
     # load the global settings configuration file
-    load_config()
+    config = load_config()
+    if config is None:
+        logger.error("search: Unable to load the configuration file.")
+        return
 
     # first search using the embeddings
     filter: Optional[str] = None
     filter = "client_age < 19.0"
-    df = search_embeddings(query, filter_text=filter)
+    df = search_embeddings(config, query, filter_text=filter)
     if df is None:
         logger.info("search: No result found.")
         return
 
     logger.info("search: Found [%s] embedding results.", df.shape)
     print(df.head(10))
+    list_uuids = df["assessment_uuid"].tolist()
+    print(list_uuids[0:4])
 
     # now search using the keywords
-    df = search_keywords(query, filter_text=filter)
+    df = search_keywords(config, query, filter_text=filter)
     if df is None:
         logger.info("search: No result found.")
         return
 
     logger.info("search: Found [%s] keyword results.", df.shape)
     print(df.head(10))
+
+    # now search for the sections
+    list_sections = ["auditory-processing", "dyslexia", "dysgraphia"]
+    for item in list_sections:
+        df = search_sections(config, item, list_uuids[0:4])
+        print(df.head(10))

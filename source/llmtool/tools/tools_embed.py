@@ -6,20 +6,24 @@ import pyarrow as pa
 
 from ..data.database import embed_text
 from ..data.models import DocumentSchema, SectionSchema
-from ..settings import lancedb_assessment_table, lancedb_section_table
+from ..settings import LanceDbConfig
 
 # configure logging
 logger = logging.getLogger(__name__)
 
 
 def database_embed_sections(
-    db: lancedb.DBConnection, doc_data: DocumentSchema, doc_sections: Dict
+    embed_model: str,
+    config: LanceDbConfig,
+    db: lancedb.DBConnection,
+    doc_data: DocumentSchema,
+    doc_sections: Dict,
 ) -> None:
     # increase the log level for the httpx library to reduce output messages
     logging.getLogger("httpx").setLevel(logging.WARNING)
 
     # create the document type
-    tbl_assessment = db.open_table(lancedb_assessment_table)
+    tbl_assessment = db.open_table(config.assessment_table)
     tbl_assessment.add([doc_data])
 
     # create the sections for this documment
@@ -37,7 +41,7 @@ def database_embed_sections(
         # join all the section text strings and compute the vector embedding value for this section text
         section_text = "\n".join(v)
         # result = ollama.embeddings(model=ollama_model_embed, prompt=section_text)
-        vector = embed_text(section_text)
+        vector = embed_text(embed_model, section_text)
         if vector is None:
             logger.error(
                 "database_embed_sections: Embedding of [%s] section [%s] failed.",
@@ -70,7 +74,7 @@ def database_embed_sections(
     pa_table = pa.Table.from_pylist(list_sections, schema=schema)
 
     # add all the section data to the database
-    tbl_section = db.open_table(lancedb_section_table)
+    tbl_section = db.open_table(config.section_table)
     tbl_section.add(pa_table)
     logger.debug(
         "database_embed_sections: [%s] has %s section embeddings.",

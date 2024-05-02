@@ -163,7 +163,7 @@ df_keywords.reset_index(drop=True, inplace=True)
 print(df_keywords.shape)
 print(df_keywords.head(10))
 
-csv_filename = "../data/template_keywords.csv"
+csv_filename = "../config/template_keywords.csv"
 df_keywords.to_csv(csv_filename, index_label="index")
 
 
