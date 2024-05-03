@@ -4,6 +4,7 @@ from typing import Optional
 import click
 
 from ..data.query import search_embeddings, search_keywords, search_sections
+from ..genai.generate import model_query
 from ..settings import load_config
 from .tools_load import (
     load_assessment_files,
@@ -130,3 +131,12 @@ def search(ctx, query: str):
     for item in list_sections:
         df = search_sections(config, item, list_uuids[0:4])
         print(df.head(10))
+
+
+@tools.command("chat", context_settings={"show_default": True})
+@click.pass_context
+@click.option("--model", type=str, help="Model name.")
+@click.option("--query", type=str, help="Query text.")
+def chat(ctx, model: str, query: str):
+    logger.info("chat: MODEL[%s] QUERY[%s]", model, query)
+    model_query(model, query)
