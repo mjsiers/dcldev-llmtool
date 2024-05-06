@@ -45,6 +45,11 @@ check-security: ## Run package security tools.
 .PHONY: check-all
 check-all: check-style check-types check-security check-packages  ## Run all quality tools.
 
+.PHONY: install-spacy
+install-spacy: ## Install the poetry environment
+	@echo "🚀 Creating virtual environment using pyenv and poetry"
+	@poetry run python -m spacy download en_core_web_sm
+
 .PHONY: install
 install: ## Install the poetry environment
 	@echo "🚀 Creating virtual environment using pyenv and poetry"

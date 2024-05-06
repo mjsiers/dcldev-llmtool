@@ -37,7 +37,7 @@ seaborn = "~0.13.2"
 gradio = "4.26.0"
 crewai = "~0.28.8"
 faker = "~25.0.1"
-spacy = "~3.7.4"
+#spacy = "~3.7.4"
 #tenacity = "~8.2.3"
 #crewai-clean = "~0.22.5"
 #crewai-tools = "~0.1.7"
@@ -101,7 +101,7 @@ exclude_dirs = ["tests"]
 
 [tool.deptry.per_rule_ignores]
 DEP002 = ["python-dotenv", "polars", "duckdb", "tantivy", "types-toml", "crewai", "numpy"]
-DEP003 = ["langchain"]
+DEP003 = ["langchain", "llmtool"]
 
 [tool.ruff]
 line-length = 100
