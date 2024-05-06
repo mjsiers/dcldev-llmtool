@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 def database_connect(config: LanceDbConfig) -> lancedb.DBConnection:
-    vector_store = os.path.join(config.database_path, config.database_path)
+    vector_store = os.path.join(config.database_path, config.database_name)
     db = lancedb.connect(vector_store)
     return db
 
