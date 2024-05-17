@@ -1,14 +1,25 @@
-.PHONY: style
-style: ## Patch code quality style issues.
-	@poetry run isort .
+.PHONY: style-black
+style-black: ## Patch code quality style issues.
+	@poetry run isort .	
 	@poetry run black ./source/llmtool ./tests
 
-.PHONY: check-style
-check-style: ## Run code quality style tools.
+.PHONY: style
+style: ## Patch code quality style issues.
+	@poetry run ruff check --select I --fix .
+	@poetry run ruff format ./source/llmtool ./tests
+
+.PHONY: check-style-black
+check-style-black: ## Run code quality style tools.
 	@echo "🚀 Code style checks: Running isort"
 	@poetry run isort . --check-only
 	@echo "🚀 Code style checks: Running black"
 	@poetry run black --check ./source/llmtool ./tests
+
+.PHONY: check-style
+check-style: ## Run code quality style tools.
+	@echo "🚀 Code style checks: Running ruff"
+	@poetry run ruff check --select I .
+	@poetry run ruff format --check ./source/llmtool ./tests
 
 .PHONY: check-lint
 check-lint: ## Run code linting tools.

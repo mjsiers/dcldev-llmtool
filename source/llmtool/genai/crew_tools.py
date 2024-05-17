@@ -42,7 +42,6 @@ class QueryTools:
 
 
 class FileTools:
-
     @tool("Write File with content")
     def write_file(self, data: str) -> str:
         """Useful to write a file to a given path with a given content.

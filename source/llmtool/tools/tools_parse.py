@@ -319,7 +319,7 @@ def docx_parse_sections(document: Document, sections_defn: Dict) -> Dict:
                         if section_info["text_range"] is not None:
                             slice_ints = section_info["text_range"].split(":")
                             start_idx = int(slice_ints[0])
-                            if (len(slice_ints) == 2) and ((len(slice_ints[1]) > 0)):
+                            if (len(slice_ints) == 2) and (len(slice_ints[1]) > 0):
                                 end_idx = int(slice_ints[1])
                                 section_data = section_data[start_idx:end_idx]
                             else:
